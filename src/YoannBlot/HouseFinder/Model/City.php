@@ -2,7 +2,7 @@
 
 namespace YoannBlot\HouseFinder\Model;
 
-use YoannBlot\HouseFinder\Validator\Boolean;
+use YoannBlot\Framework\Validator\Boolean;
 
 /**
  * Class City

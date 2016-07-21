@@ -21,4 +21,13 @@ class AdminControllerTest extends \PHPUnit_Framework_TestCase {
         $this->assertArrayHasKey('city', $aValidPageData);
         $this->assertInstanceOf(City::class, $aValidPageData['city']);
     }
+
+    public function testDisplayPage () {
+        $oController = new AdminController();
+        $oController->setCurrentPage('city');
+        $oController->displayPage();
+
+        $sOutput = $this->getActualOutput();
+        $this->assertNotEmpty($sOutput);
+    }
 }

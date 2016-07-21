@@ -30,6 +30,30 @@ abstract class AbstractController {
     private $sCurrentPage = self::DEFAULT_PAGE;
 
     /**
+     * Check if given path is matching current controller.
+     *
+     * @param string $sPath path to check.
+     *
+     * @return bool true if given path is matching current controller.
+     */
+    public function matchPath (string $sPath) : bool {
+        $oReflectionClass = new \ReflectionClass($this);
+        $oDocComment = $oReflectionClass->getDocComment();
+        preg_match_all('#@path\(\"(.*)\"\)\n#s', $oDocComment, $aPathAnnotations);
+
+        if (count($aPathAnnotations[1]) > 0) {
+            $sControllerPath = $aPathAnnotations[1][0];
+            $bMatch = 0 === strpos($sPath, $sControllerPath);
+        } else {
+            // TODO log error
+            echo 'Vous devez donner un paramètre @path à votre Controller pour l\'utiliser.';
+            $bMatch = false;
+        }
+
+        return $bMatch;
+    }
+
+    /**
      * Default page. Can be override if index page is defined in current controller.
      *
      * @return array empty array
@@ -87,7 +111,13 @@ abstract class AbstractController {
      */
     private function getViewDirectory () : string {
         $sDirectory = '';
-        // TODO project directory path
+
+        $sProjectPath = get_class($this);
+        $sProjectPath = substr($sProjectPath, 0, strrpos($sProjectPath, '\\Controller'));
+        $sProjectPath = str_replace('\\', DIRECTORY_SEPARATOR, $sProjectPath);
+
+        $sDirectory .= SRC_PATH;
+        $sDirectory .= $sProjectPath . DIRECTORY_SEPARATOR;
 
         $sDirectory .= static::VIEW_DIR_NAME . DIRECTORY_SEPARATOR;
         $sDirectory .= $this->getCurrentClassName() . DIRECTORY_SEPARATOR;
@@ -103,5 +133,13 @@ abstract class AbstractController {
         $sPage = $this->getCurrentPage() . 'Page';
 
         return $this->$sPage();
+    }
+
+    /**
+     * Display current page.
+     */
+    public function displayPage () {
+        $aData = $this->getPageData();
+        require $this->getViewDirectory();
     }
 }

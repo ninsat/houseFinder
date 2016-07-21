@@ -1,13 +1,13 @@
 <?php
 
-namespace YoannBlot\HouseFinder\Validator;
+namespace YoannBlot\Framework\Validator;
 
 /**
  * Class BooleanTest
  *
- * @package YoannBlot\HouseFinder\Validator
+ * @package YoannBlot\Framework\Validator
  *
- * @cover  Boolean
+ * @cover   Boolean
  */
 class BooleanTest extends \PHPUnit_Framework_TestCase {
 

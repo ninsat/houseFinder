@@ -69,4 +69,25 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('title', $aValidPageData);
     }
+
+    public function testMatchPath () {
+        $oController = new FakeController();
+
+        $oMethod = Reflection::getMethod($oController, "matchPath");
+
+        $this->assertFalse($oMethod->invoke($oController, 'wrong'));
+        $this->assertTrue($oMethod->invoke($oController, '/fake/'));
+    }
+
+    public function testMatchPathWithoutPath () {
+        $oController = new NoPathController();
+
+        $oMethod = Reflection::getMethod($oController, "matchPath");
+
+        $this->assertFalse($oMethod->invoke($oController, ''));
+        $this->assertFalse($oMethod->invoke($oController, 'wrong'));
+        $this->assertFalse($oMethod->invoke($oController, '/fake/'));
+    }
+
+
 }

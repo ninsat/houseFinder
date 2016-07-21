@@ -12,6 +12,7 @@ function autoloadTestClass ($sClassName) {
     $sFilePath = __DIR__ . DIRECTORY_SEPARATOR . $sClassName . '.php';
     $sFilePath = str_replace('\\', '/', $sFilePath);
     if (is_file($sFilePath)) {
+        /** @noinspection PhpIncludeInspection */
         require_once $sFilePath;
     }
 }

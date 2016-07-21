@@ -1,11 +1,11 @@
 <?php
 
-namespace YoannBlot\HouseFinder\Validator;
+namespace YoannBlot\Framework\Validator;
 
 /**
  * Class Boolean
  *
- * @package YoannBlot\HouseFinder\Validator
+ * @package YoannBlot\Framework\Validator
  */
 abstract class Boolean {
 

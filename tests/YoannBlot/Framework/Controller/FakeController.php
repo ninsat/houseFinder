@@ -6,6 +6,8 @@ namespace YoannBlot\Framework\Controller;
  * Class FakeController
  *
  * @package YoannBlot\Framework\Controller
+ *
+ * @path("/fake/")
  */
 class FakeController extends AbstractController {
 
