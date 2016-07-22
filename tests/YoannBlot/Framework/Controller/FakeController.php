@@ -11,6 +11,12 @@ namespace YoannBlot\Framework\Controller;
  */
 class FakeController extends AbstractController {
 
+    /**
+     * @inheritdoc
+     */
+    public function autoSelectPage () {
+    }
+
     protected function validPage () {
         return [
             'title' => 'this is a title'

@@ -8,4 +8,11 @@ namespace YoannBlot\Framework\Controller;
  * @package YoannBlot\Framework\Controller
  */
 class NoPathController extends AbstractController {
+
+    /**
+     * @inheritdoc
+     */
+    public function autoSelectPage () {
+    }
+
 }

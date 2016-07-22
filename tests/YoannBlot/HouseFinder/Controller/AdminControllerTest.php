@@ -3,7 +3,7 @@
 namespace YoannBlot\HouseFinder\Controller;
 
 use YoannBlot\Framework\Helper\Reflection;
-use YoannBlot\HouseFinder\Model\City;
+use YoannBlot\HouseFinder\Model\Entity\City;
 
 /**
  * Class AdminControllerTest
@@ -18,16 +18,15 @@ class AdminControllerTest extends \PHPUnit_Framework_TestCase {
 
         $aValidPageData = Reflection::getValue($oController, "getPageData");
         $this->assertNotEmpty($aValidPageData);
-        $this->assertArrayHasKey('city', $aValidPageData);
-        $this->assertInstanceOf(City::class, $aValidPageData['city']);
+        $this->assertArrayHasKey('cities', $aValidPageData);
+        $this->assertContainsOnlyInstancesOf(City::class, $aValidPageData['cities']);
     }
 
     public function testDisplayPage () {
         $oController = new AdminController();
         $oController->setCurrentPage('city');
-        $oController->displayPage();
+        $sOutput = $oController->displayPage();
 
-        $sOutput = $this->getActualOutput();
         $this->assertNotEmpty($sOutput);
     }
 }

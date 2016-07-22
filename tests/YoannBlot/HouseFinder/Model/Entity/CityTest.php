@@ -1,11 +1,11 @@
 <?php
 
-namespace YoannBlot\HouseFinder\Model;
+namespace YoannBlot\HouseFinder\Model\Entity;
 
 /**
  * Class CityTest
  *
- * @package YoannBlot\HouseFinder\Model
+ * @package YoannBlot\HouseFinder\Model\Entity
  *
  * @cover City
  */

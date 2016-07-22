@@ -1,6 +1,7 @@
 <?php
 
 namespace YoannBlot\Framework\Controller;
+use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 
 /**
  * Class AbstractController.
@@ -46,21 +47,14 @@ abstract class AbstractController {
             $bMatch = 0 === strpos($sPath, $sControllerPath);
         } else {
             // TODO log error
-            echo 'Vous devez donner un paramètre @path à votre Controller pour l\'utiliser.';
+            echo 'You must add an annotation @path to your Controller';
             $bMatch = false;
         }
 
         return $bMatch;
     }
 
-    /**
-     * Default page. Can be override if index page is defined in current controller.
-     *
-     * @return array empty array
-     */
-    protected function indexPage () : array {
-        return [];
-    }
+    public abstract function autoSelectPage ();
 
     /**
      * @return string current page
@@ -109,7 +103,7 @@ abstract class AbstractController {
     /**
      * @return string View directory
      */
-    private function getViewDirectory () : string {
+    private function getViewPath () : string {
         $sDirectory = '';
 
         $sProjectPath = get_class($this);
@@ -140,6 +134,20 @@ abstract class AbstractController {
      */
     public function displayPage () {
         $aData = $this->getPageData();
-        require $this->getViewDirectory();
+
+        ob_start();
+        $sView = $this->getViewPath();
+        if (!is_file($sView)) {
+            // TODO log view page not found
+            throw new Redirect404Exception();
+        } else {
+            extract($aData);
+            /** @noinspection PhpIncludeInspection */
+            require $sView;
+        }
+
+        return ob_get_clean();
+
     }
+
 }

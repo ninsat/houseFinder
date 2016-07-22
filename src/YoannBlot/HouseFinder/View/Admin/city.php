@@ -1,4 +1,7 @@
 <!doctype html>
+<?php
+/** @var \YoannBlot\HouseFinder\Model\Entity\City[] $cities */
+?>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -12,8 +15,9 @@
 <form action="" method="post">
     <h2>Villes sélectionnées</h2>
     <ul class="selected-cities">
-        <li>Poissy</li>
-        <li>Sartrouville</li>
+        <?php foreach ($cities as $city): ?>
+            <li><?= $city->getName(); ?></li>
+        <?php endforeach; ?>
     </ul>
 
     <label for="add-city">Ajouter</label>

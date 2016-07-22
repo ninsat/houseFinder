@@ -2,6 +2,7 @@
 
 define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 define('SRC_PATH', ROOT_PATH . 'src' . DIRECTORY_SEPARATOR);
+define('CONFIG_PATH', ROOT_PATH . 'config' . DIRECTORY_SEPARATOR);
 
 /**
  * Autoload class from its name.

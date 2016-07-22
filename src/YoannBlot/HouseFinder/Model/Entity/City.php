@@ -1,36 +1,37 @@
 <?php
 
-namespace YoannBlot\HouseFinder\Model;
+namespace YoannBlot\HouseFinder\Model\Entity;
 
+use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Validator\Boolean;
 
 /**
  * Class City
  *
- * @package YoannBlot\HouseFinder\Model
+ * @package YoannBlot\HouseFinder\Model\Entity
  */
-final class City {
+final class City extends AbstractEntity {
 
     /**
      * @var string name.
      */
-    private $sName = '';
+    private $name = '';
 
     /**
      * @var string postal code.
      */
-    private $sPostalCode = '';
+    private $postal_code = '';
 
     /**
      * @var bool is city enabled.
      */
-    private $bEnabled = true;
+    private $enabled = true;
 
     /**
      * @return string
      */
     public function getName (): string {
-        return $this->sName;
+        return $this->name;
     }
 
     /**
@@ -38,7 +39,7 @@ final class City {
      */
     public function setName (string $sName) {
         if (strlen($sName) > 2) {
-            $this->sName = $sName;
+            $this->name = $sName;
         }
     }
 
@@ -46,7 +47,7 @@ final class City {
      * @return string
      */
     public function getPostalCode (): string {
-        return $this->sPostalCode;
+        return $this->postal_code;
     }
 
     /**
@@ -54,7 +55,7 @@ final class City {
      */
     public function setPostalCode (string $sPostalCode) {
         if (strlen($sPostalCode) > 2) {
-            $this->sPostalCode = $sPostalCode;
+            $this->postal_code = $sPostalCode;
         }
     }
 
@@ -62,14 +63,14 @@ final class City {
      * @return boolean
      */
     public function isEnabled (): bool {
-        return $this->bEnabled;
+        return $this->enabled;
     }
 
     /**
      * @param boolean $bEnabled
      */
     public function setEnabled (bool $bEnabled) {
-        $this->bEnabled = Boolean::getValue($bEnabled);
+        $this->enabled = Boolean::getValue($bEnabled);
     }
 
 }

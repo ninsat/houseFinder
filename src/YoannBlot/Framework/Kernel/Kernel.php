@@ -4,6 +4,7 @@ namespace YoannBlot\Framework\Kernel;
 
 use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Controller\DefaultController;
+use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 
 /**
  * Class Kernel
@@ -16,8 +17,20 @@ class Kernel {
      * Kernel constructor.
      */
     public function __construct () {
-        $oController = $this->selectController();
-        $oController->displayPage();
+        $this->display();
+    }
+
+    private function display () {
+        try {
+            $oController = $this->selectController();
+            $sOutput = $oController->displayPage();
+        } catch (Redirect404Exception $oException) {
+            $oController = new DefaultController();
+            $oController->setCurrentPage('notFound');
+            $sOutput = $oController->displayPage();
+        }
+
+        echo $sOutput;
     }
 
     /**
@@ -38,6 +51,7 @@ class Kernel {
 
                 if ($oController->matchPath($sPath)) {
                     $oSelectedController = $oController;
+                    $oSelectedController->autoSelectPage();
                     break;
                 }
             }

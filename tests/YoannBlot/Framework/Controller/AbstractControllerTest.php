@@ -37,7 +37,7 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
     public function testGetViewDirectory () {
         $oController = new FakeController();
 
-        $sViewDirectory = Reflection::getValue($oController, "getViewDirectory");
+        $sViewDirectory = Reflection::getValue($oController, "getViewPath");
 
         $this->assertNotNull($sViewDirectory);
         $this->assertNotEmpty($sViewDirectory);
@@ -52,13 +52,6 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
         $this->assertFalse($oMethod->invoke($oController, static::INVALID_PAGE));
         $this->assertTrue($oMethod->invoke($oController, static::VALID_PAGE));
-    }
-
-    public function testGetDefaultPage () {
-        $oController = new FakeController();
-
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
-        $this->assertEmpty($aValidPageData);
     }
 
     public function testGetPage () {
@@ -88,6 +81,5 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
         $this->assertFalse($oMethod->invoke($oController, 'wrong'));
         $this->assertFalse($oMethod->invoke($oController, '/fake/'));
     }
-
 
 }

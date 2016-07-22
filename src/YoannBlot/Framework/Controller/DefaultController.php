@@ -12,6 +12,13 @@ namespace YoannBlot\Framework\Controller;
 class DefaultController extends AbstractController {
 
     /**
+     * @inheritdoc
+     */
+    public function autoSelectPage () {
+        $this->setCurrentPage('notFound');
+    }
+
+    /**
      * @return array
      */
     public function notFoundPage () : array {

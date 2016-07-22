@@ -3,7 +3,8 @@
 namespace YoannBlot\HouseFinder\Controller;
 
 use YoannBlot\Framework\Controller\AbstractController;
-use YoannBlot\HouseFinder\Model\City;
+use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
+use YoannBlot\HouseFinder\Model\Repository\CityRepository;
 
 /**
  * Class AdminController.
@@ -15,17 +16,27 @@ use YoannBlot\HouseFinder\Model\City;
 class AdminController extends AbstractController {
 
     /**
-     * @return array city
+     * @inheritdoc
+     */
+    public function autoSelectPage () {
+        $this->setCurrentPage('city');
+    }
+
+    /**
+     * @return CityRepository current repository.
+     */
+    private function getRepository (): CityRepository {
+        return new CityRepository();
+    }
+
+    /**
+     * @return array
+     *
+     * @throws Redirect404Exception
      */
     protected function cityPage () : array {
-        $oCity = new City();
-        // TODO get real city
-        $oCity->setName('Poissy');
-        $oCity->setPostalCode('78300');
-        $oCity->setEnabled(true);
-
         return [
-            'city' => $oCity
+            'cities' => $this->getRepository()->getAll()
         ];
     }
 
