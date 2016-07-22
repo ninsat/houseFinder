@@ -1,7 +1,7 @@
-<!doctype html>
 <?php
 /** @var \YoannBlot\HouseFinder\Model\Entity\City[] $cities */
 ?>
+<!doctype html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
@@ -13,10 +13,10 @@
 <body>
 <h1>Villes</h1>
 <form action="" method="post">
-    <h2>Villes sélectionnées</h2>
+    <h2><?= count($cities); ?> villes sélectionnées</h2>
     <ul class="selected-cities">
         <?php foreach ($cities as $city): ?>
-            <li><?= $city->getName(); ?></li>
+            <li><?= $city->getName(); ?> / (<?= $city->getPostalCode(); ?>)</li>
         <?php endforeach; ?>
     </ul>
 

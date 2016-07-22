@@ -2,15 +2,16 @@
 
 namespace YoannBlot\Framework\Model\DataBase;
 
+use YoannBlot\Framework\Utils\File\Loader;
+
 /**
  * Class DataBase ConfigurationLoader.
  * Load database configuration.
  *
  * @package YoannBlot\Framework\Model\DataBase
+ * @author  Yoann Blot
  */
 final class ConfigurationLoader {
-
-    const FILE = 'database.conf';
 
     const SECTION = 'DATABASE';
     const HOST = 'host';
@@ -28,19 +29,12 @@ final class ConfigurationLoader {
      * Load database configuration.
      */
     private static function load () {
-        $sConfigFile = CONFIG_PATH . static::FILE;
-        if (is_file($sConfigFile)) {
-            $aIniParameters = parse_ini_file($sConfigFile, true);
-            if (array_key_exists(static::SECTION, $aIniParameters)) {
-                $aIniParameters = $aIniParameters[ static::SECTION ];
-                static::$oConfig = new DataBaseConfig();
-                static::$oConfig->setHost($aIniParameters[ static::HOST ]);
-                static::$oConfig->setPort($aIniParameters[ static::PORT ]);
-                static::$oConfig->setUsername($aIniParameters[ static::USER ]);
-                static::$oConfig->setPassword($aIniParameters[ static::PASSWORD ]);
-                static::$oConfig->setDatabaseName($aIniParameters[ static::DATABASE_NAME ]);
-            }
-        }
+        static::$oConfig = new DataBaseConfig();
+        static::$oConfig->setHost(Loader::get(static::HOST, static::SECTION));
+        static::$oConfig->setPort(Loader::get(static::PORT, static::SECTION));
+        static::$oConfig->setUsername(Loader::get(static::USER, static::SECTION));
+        static::$oConfig->setPassword(Loader::get(static::PASSWORD, static::SECTION));
+        static::$oConfig->setDatabaseName(Loader::get(static::DATABASE_NAME, static::SECTION));
     }
 
     /**

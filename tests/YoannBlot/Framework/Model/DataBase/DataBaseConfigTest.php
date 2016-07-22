@@ -8,6 +8,7 @@ use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
  * Class DataBaseConfigTest
  *
  * @package Framework\Model\DataBase
+ * @author  Yoann Blot
  */
 class DataBaseConfigTest extends \PHPUnit_Framework_TestCase {
 

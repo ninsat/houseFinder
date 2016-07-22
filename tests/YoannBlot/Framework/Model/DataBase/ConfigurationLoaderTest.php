@@ -8,6 +8,7 @@ use YoannBlot\Framework\Model\DataBase\ConfigurationLoader;
  * Class ConfigurationLoaderTest
  *
  * @package Framework\Model\DataBase
+ * @author  Yoann Blot
  */
 class ConfigurationLoaderTest extends \PHPUnit_Framework_TestCase {
 

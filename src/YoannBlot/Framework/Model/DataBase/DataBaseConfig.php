@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Model\DataBase;
  * Class DataBaseConfig
  *
  * @package YoannBlot\Framework\Model\DataBase
+ * @author  Yoann Blot
  */
 final class DataBaseConfig {
 

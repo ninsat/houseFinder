@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Validator;
  * Class Boolean
  *
  * @package YoannBlot\Framework\Validator
+ * @author  Yoann Blot
  */
 abstract class Boolean {
 

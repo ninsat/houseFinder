@@ -9,6 +9,7 @@ use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
  * Class Connector
  *
  * @package YoannBlot\Framework\Model\DataBase
+ * @author  Yoann Blot
  */
 class Connector {
 

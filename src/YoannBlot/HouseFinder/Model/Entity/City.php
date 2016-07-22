@@ -9,6 +9,7 @@ use YoannBlot\Framework\Validator\Boolean;
  * Class City
  *
  * @package YoannBlot\HouseFinder\Model\Entity
+ * @author  Yoann Blot
  */
 final class City extends AbstractEntity {
 

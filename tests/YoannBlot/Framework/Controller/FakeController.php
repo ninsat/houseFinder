@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Controller;
  * Class FakeController
  *
  * @package YoannBlot\Framework\Controller
+ * @author  Yoann Blot
  *
  * @path("/fake/")
  */

@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Validator;
  * Class BooleanTest
  *
  * @package YoannBlot\Framework\Validator
+ * @author  Yoann Blot
  *
  * @cover   Boolean
  */

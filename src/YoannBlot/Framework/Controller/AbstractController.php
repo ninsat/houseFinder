@@ -1,12 +1,15 @@
 <?php
 
 namespace YoannBlot\Framework\Controller;
+
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
+use YoannBlot\Framework\Utils\Log\Log;
 
 /**
  * Class AbstractController.
  *
  * @package YoannBlot\Framework\Controller
+ * @author  Yoann Blot
  */
 abstract class AbstractController {
 
@@ -46,8 +49,7 @@ abstract class AbstractController {
             $sControllerPath = $aPathAnnotations[1][0];
             $bMatch = 0 === strpos($sPath, $sControllerPath);
         } else {
-            // TODO log error
-            echo 'You must add an annotation @path to your Controller';
+            Log::get()->error('You must add an annotation @path to your Controller');
             $bMatch = false;
         }
 
@@ -136,14 +138,14 @@ abstract class AbstractController {
         $aData = $this->getPageData();
 
         ob_start();
-        $sView = $this->getViewPath();
-        if (!is_file($sView)) {
-            // TODO log view page not found
+        $sViewPath = $this->getViewPath();
+        if (!is_file($sViewPath)) {
+            Log::get()->warn("View page '$sViewPath' not found. Please ensure file exists.");
             throw new Redirect404Exception();
         } else {
             extract($aData);
             /** @noinspection PhpIncludeInspection */
-            require $sView;
+            require $sViewPath;
         }
 
         return ob_get_clean();

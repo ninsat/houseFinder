@@ -10,6 +10,7 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
  * Class AdminController.
  *
  * @package YoannBlot\HouseFinder\Controller
+ * @author  Yoann Blot
  *
  * @path("/admin")
  */

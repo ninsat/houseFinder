@@ -9,6 +9,7 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  * Class AdminControllerTest
  *
  * @package YoannBlot\HouseFinder\Controller
+ * @author  Yoann Blot
  */
 class AdminControllerTest extends \PHPUnit_Framework_TestCase {
 

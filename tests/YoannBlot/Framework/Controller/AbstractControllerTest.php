@@ -8,6 +8,7 @@ use YoannBlot\Framework\Helper\Reflection;
  * Class AbstractControllerTest
  *
  * @package YoannBlot\Framework\Controller
+ * @author  Yoann Blot
  */
 class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
@@ -77,8 +78,13 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
         $oMethod = Reflection::getMethod($oController, "matchPath");
 
+        $_SERVER['REQUEST_URI'] = '';
         $this->assertFalse($oMethod->invoke($oController, ''));
+
+        $_SERVER['REQUEST_URI'] = 'wrong';
         $this->assertFalse($oMethod->invoke($oController, 'wrong'));
+
+        $_SERVER['REQUEST_URI'] = '/fake/';
         $this->assertFalse($oMethod->invoke($oController, '/fake/'));
     }
 

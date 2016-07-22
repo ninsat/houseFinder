@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Helper;
  * Class Reflection Helper.
  *
  * @package Framework\Helper
+ * @author  Yoann Blot
  */
 abstract class Reflection {
 

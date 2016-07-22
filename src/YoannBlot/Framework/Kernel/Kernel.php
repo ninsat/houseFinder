@@ -5,11 +5,13 @@ namespace YoannBlot\Framework\Kernel;
 use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Controller\DefaultController;
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
+use YoannBlot\Framework\Utils\Log\Log;
 
 /**
  * Class Kernel
  *
  * @package YoannBlot\Framework\Kernel
+ * @author  Yoann Blot
  */
 class Kernel {
 
@@ -60,6 +62,7 @@ class Kernel {
         if (null === $oSelectedController) {
             $oSelectedController = new DefaultController();
             $oSelectedController->setCurrentPage('notFound');
+            Log::get()->warn("Path '$sPath' not found, redirect to 404 page.");
         }
 
         return $oSelectedController;

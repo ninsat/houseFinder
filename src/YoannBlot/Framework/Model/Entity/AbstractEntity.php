@@ -7,13 +7,16 @@ namespace YoannBlot\Framework\Model\Entity;
  * All entities should extend this class.
  *
  * @package YoannBlot\Framework\Model\Entity
+ * @author  Yoann Blot
  */
 abstract class AbstractEntity {
+
+    const DEFAULT_ID = -1;
 
     /**
      * @var int id
      */
-    protected $id;
+    protected $id = self::DEFAULT_ID;
 
     /**
      * @return int

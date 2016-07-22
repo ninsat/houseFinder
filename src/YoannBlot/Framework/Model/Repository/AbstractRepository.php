@@ -10,6 +10,7 @@ use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
  * Class AbstractRepository
  *
  * @package YoannBlot\Framework\Model\Repository
+ * @author  Yoann Blot
  */
 abstract class AbstractRepository {
 
@@ -47,11 +48,27 @@ abstract class AbstractRepository {
     }
 
     /**
+     * Get all values matching $sWhere, ordering by $sOrderBy, and limited result to $iLimit.
+     *
+     *
+     * @param string $sWhere   where clause to filter values.
+     * @param string $sOrderBy order by field with direction, i.e. 'date DESC'
+     * @param int    $iLimit   maximum amount of data to retrieve.
+     *
      * @return AbstractEntity[] all entities.
      */
-    public function getAll () {
+    public function getAll (string $sWhere = '', string $sOrderBy = '', int $iLimit = 0): array {
         $sQuery = '';
-        $sQuery .= "select * from " . $this->getTable();
+        $sQuery .= "select * from {$this->getTable()} ";
+        if ('' !== $sWhere) {
+            $sQuery .= " $sWhere ";
+        }
+        if ('' !== $sOrderBy) {
+            $sQuery .= " ORDER BY $sOrderBy ";
+        }
+        if (0 !== $iLimit) {
+            $sQuery .= " LIMIT $iLimit";
+        }
 
         return Connector::get()->queryMultiple($sQuery, $this->getEntityClass());
     }

@@ -6,8 +6,9 @@ namespace YoannBlot\HouseFinder\Model\Entity;
  * Class CityTest
  *
  * @package YoannBlot\HouseFinder\Model\Entity
+ * @author  Yoann Blot
  *
- * @cover City
+ * @cover   City
  */
 class CityTest extends \PHPUnit_Framework_TestCase {
 
