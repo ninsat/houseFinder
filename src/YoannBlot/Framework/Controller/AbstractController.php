@@ -4,6 +4,7 @@ namespace YoannBlot\Framework\Controller;
 
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\Framework\Utils\Log\Log;
+use YoannBlot\Framework\View\View;
 
 /**
  * Class AbstractController.
@@ -12,16 +13,6 @@ use YoannBlot\Framework\Utils\Log\Log;
  * @author  Yoann Blot
  */
 abstract class AbstractController {
-
-    /**
-     * View directory name.
-     */
-    const VIEW_DIR_NAME = 'View';
-
-    /**
-     * Template extension file.
-     */
-    const TEMPLATE_EXT = '.php';
 
     /**
      * Default page name.
@@ -92,37 +83,6 @@ abstract class AbstractController {
     }
 
     /**
-     * @return string cleaned current class name.
-     */
-    private function getCurrentClassName () : string {
-        $sClassName = get_class($this);
-        $sClassName = substr($sClassName, strrpos($sClassName, '\\') + 1);
-        $sClassName = substr($sClassName, 0, strpos($sClassName, 'Controller'));
-
-        return $sClassName;
-    }
-
-    /**
-     * @return string View directory
-     */
-    private function getViewPath () : string {
-        $sDirectory = '';
-
-        $sProjectPath = get_class($this);
-        $sProjectPath = substr($sProjectPath, 0, strrpos($sProjectPath, '\\Controller'));
-        $sProjectPath = str_replace('\\', DIRECTORY_SEPARATOR, $sProjectPath);
-
-        $sDirectory .= SRC_PATH;
-        $sDirectory .= $sProjectPath . DIRECTORY_SEPARATOR;
-
-        $sDirectory .= static::VIEW_DIR_NAME . DIRECTORY_SEPARATOR;
-        $sDirectory .= $this->getCurrentClassName() . DIRECTORY_SEPARATOR;
-        $sDirectory .= $this->getCurrentPage() . static::TEMPLATE_EXT;
-
-        return $sDirectory;
-    }
-
-    /**
      * @return array data to send to view page.
      */
     private function getPageData (): array {
@@ -135,18 +95,10 @@ abstract class AbstractController {
      * Display current page.
      */
     public function displayPage () {
-        $aData = $this->getPageData();
-
         ob_start();
-        $sViewPath = $this->getViewPath();
-        if (!is_file($sViewPath)) {
-            Log::get()->warn("View page '$sViewPath' not found. Please ensure file exists.");
-            throw new Redirect404Exception();
-        } else {
-            extract($aData);
-            /** @noinspection PhpIncludeInspection */
-            require $sViewPath;
-        }
+
+        $oView = new View($this, $this->getPageData());
+        $oView->display();
 
         return ob_get_clean();
 

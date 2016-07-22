@@ -1,0 +1,67 @@
+@import (less) "../vendor/normalize/normalize.css";
+@import "variables";
+@import "mixins";
+
+body {
+  font-size: 16px;
+}
+
+a {
+  text-decoration: none;
+  color: @primaryColor;
+  transition: all 1s;
+
+  &:hover {
+    color: darken(@primaryColor, 10%);
+    transition: all 500ms;
+  }
+}
+
+h1 {
+  background: @primaryColor;
+  color: @whiteColor;
+  margin: 0;
+  padding: .5rem 1rem;
+  font-size: 1.5rem;
+  text-transform: uppercase;
+}
+
+ul.badges {
+  .no-space();
+  font-size: 0;
+  text-align: center;
+  > li {
+    .no-space();
+    list-style-type: none;
+    display: inline-block;
+
+    &:first-child {
+      border-bottom-left-radius: .5rem;
+      > a {
+        border-bottom-left-radius: .5rem;
+      }
+    }
+
+    &:last-child {
+      border-bottom-right-radius: .5rem;
+      > a {
+        border-bottom-right-radius: .5rem;
+      }
+    }
+
+    > a {
+      .no-space();
+      padding: .5rem 1rem;
+      font-size: 1.2rem;
+      display: block;
+      text-decoration: none;
+      color: @secondaryColor;
+      background: @primaryColor;
+
+      &:hover {
+        background: @secondaryColor;
+        color: @primaryColor;
+      }
+    }
+  }
+}

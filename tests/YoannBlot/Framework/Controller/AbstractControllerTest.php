@@ -32,20 +32,6 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
         $this->assertEquals(static::VALID_PAGE, $oController->getCurrentPage());
     }
 
-    /**
-     * Test get view directory method.
-     */
-    public function testGetViewDirectory () {
-        $oController = new FakeController();
-
-        $sViewDirectory = Reflection::getValue($oController, "getViewPath");
-
-        $this->assertNotNull($sViewDirectory);
-        $this->assertNotEmpty($sViewDirectory);
-        $this->assertContains(AbstractController::VIEW_DIR_NAME, $sViewDirectory);
-        $this->assertContains(AbstractController::TEMPLATE_EXT, $sViewDirectory);
-    }
-
     public function testIsValidPage () {
         $oController = new FakeController();
 
