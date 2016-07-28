@@ -28,11 +28,11 @@ class Log {
      * @return Log current instance.
      */
     public static function get () : Log {
-        if (null === self::$oInstance) {
-            self::$oInstance = new Log();
+        if (null === static::$oInstance) {
+            static::$oInstance = new Log();
         }
 
-        return self::$oInstance;
+        return static::$oInstance;
     }
 
     /**
@@ -81,14 +81,13 @@ class Log {
         ini_set('error_reporting', E_ALL);
 
         $bDebugMode = Boolean::getValue(Loader::get('debug'));
+        $sLogFile = $this->getFile();
+        Directory::create(dirname($sLogFile));
+        ini_set('error_log', $sLogFile);
 
         if (!$bDebugMode) {
             ini_set('display_errors', 'Off');
             ini_set('log_errors', 'On');
-            $sLogFile = $this->getFile();
-            Directory::create(dirname($sLogFile));
-            ini_set('error_log', $sLogFile);
-
         }
     }
 

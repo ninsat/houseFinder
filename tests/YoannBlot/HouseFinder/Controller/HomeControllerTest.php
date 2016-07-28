@@ -6,15 +6,15 @@ use YoannBlot\Framework\Helper\Reflection;
 use YoannBlot\HouseFinder\Model\Entity\City;
 
 /**
- * Class DefaultControllerTest
+ * Class HomeControllerTest
  *
  * @package YoannBlot\HouseFinder\Controller
  * @author  Yoann Blot
  */
-class DefaultControllerTest extends \PHPUnit_Framework_TestCase {
+class HomeControllerTest extends \PHPUnit_Framework_TestCase {
 
-    public function testIndexPage () {
-        $oController = new DefaultController();
+    public function testHomePage () {
+        $oController = new HomeController();
 
         $aValidPageData = Reflection::getValue($oController, "getPageData");
         $this->assertNotEmpty($aValidPageData);
@@ -23,7 +23,7 @@ class DefaultControllerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testDisplayPage () {
-        $oController = new DefaultController();
+        $oController = new HomeController();
         $sOutput = $oController->displayPage();
 
         $this->assertNotEmpty($sOutput);

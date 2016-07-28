@@ -4,6 +4,7 @@ namespace YoannBlot\Framework\Model\DataBase;
 
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
+use YoannBlot\Framework\Model\Exception\QueryException;
 
 /**
  * Class Connector
@@ -91,11 +92,14 @@ class Connector {
      *
      * @return AbstractEntity matched entity if found, otherwise null.
      * @throws EntityNotFoundException if entity was not found.
+     * @throws QueryException query exception.
      */
     public function querySingle (string $sQuery, string $sClassName): AbstractEntity {
         $this->initConnection();
         $oStatement = $this->getConnection()->prepare($sQuery);
-        $oStatement->execute();
+        if (false === $oStatement->execute()) {
+            throw new QueryException($sQuery, $oStatement->errorInfo()[2], intval($oStatement->errorCode()));
+        }
         $oObject = $oStatement->fetchObject($sClassName);
         if (false === $oObject) {
             throw new EntityNotFoundException();
@@ -111,11 +115,14 @@ class Connector {
      * @param string $sClassName entity class name
      *
      * @return AbstractEntity[] matched entities as array.
+     * @throws QueryException query exception.
      */
     public function queryMultiple (string $sQuery, string $sClassName): array {
         $this->initConnection();
         $oStatement = $this->getConnection()->prepare($sQuery);
-        $oStatement->execute();
+        if (false === $oStatement->execute()) {
+            throw new QueryException($sQuery, $oStatement->errorInfo()[2], intval($oStatement->errorCode()));
+        }
         $aObjects = [];
         foreach ($oStatement->fetchAll(\PDO::FETCH_CLASS, $sClassName) as $oObject) {
             $aObjects [] = $oObject;

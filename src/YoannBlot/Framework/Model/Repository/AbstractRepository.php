@@ -5,6 +5,8 @@ namespace YoannBlot\Framework\Model\Repository;
 use YoannBlot\Framework\Model\DataBase\Connector;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
+use YoannBlot\Framework\Model\Exception\QueryException;
+use YoannBlot\Framework\Utils\Log\Log;
 
 /**
  * Class AbstractRepository
@@ -70,7 +72,14 @@ abstract class AbstractRepository {
             $sQuery .= " LIMIT $iLimit";
         }
 
-        return Connector::get()->queryMultiple($sQuery, $this->getEntityClass());
+        try {
+            $aEntities = Connector::get()->queryMultiple($sQuery, $this->getEntityClass());
+        } catch (QueryException $oException) {
+            Log::get()->error($oException->getMessage());
+            $aEntities = [];
+        }
+
+        return $aEntities;
     }
 
     /**

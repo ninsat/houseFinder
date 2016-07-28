@@ -2,7 +2,6 @@
 
 namespace YoannBlot\Framework\Controller;
 
-use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\Framework\Utils\Log\Log;
 use YoannBlot\Framework\View\View;
 
@@ -34,13 +33,13 @@ abstract class AbstractController {
     public function matchPath (string $sPath) : bool {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
-        preg_match_all('#@path\(\"(.*)\"\)\n#s', $oDocComment, $aPathAnnotations);
+        preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
 
         if (count($aPathAnnotations[1]) > 0) {
             $sControllerPath = $aPathAnnotations[1][0];
             $bMatch = 0 === strpos($sPath, $sControllerPath);
         } else {
-            Log::get()->error('You must add an annotation @path to your Controller');
+            Log::get()->error('You must add an annotation @path to your Controller ' . get_class($this));
             $bMatch = false;
         }
 
@@ -101,7 +100,6 @@ abstract class AbstractController {
         $oView->display();
 
         return ob_get_clean();
-
     }
 
 }

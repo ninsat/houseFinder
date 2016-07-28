@@ -2,7 +2,7 @@
 
 namespace YoannBlot\Framework\Model\Repository;
 
-use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
+use YoannBlot\Framework\Model\Exception\QueryException;
 
 /**
  * Class AbstractRepositoryTest
@@ -15,7 +15,7 @@ class AbstractRepositoryTest extends \PHPUnit_Framework_TestCase {
     public function testGet () {
         $oRepository = new FakeRepository();
 
-        $this->expectException(EntityNotFoundException::class);
+        $this->expectException(QueryException::class);
         $oRepository->get(0);
     }
 
