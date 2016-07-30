@@ -23,6 +23,10 @@ abstract class AbstractController {
      * @var string current page
      */
     private $sCurrentRoute = self::DEFAULT_PAGE;
+    /**
+     * @var array route parameters.
+     */
+    private $aRouteParameters = [];
 
     /**
      * Get the controller pattern.
@@ -84,9 +88,11 @@ abstract class AbstractController {
                     $sCurrentPath = str_replace($this->getControllerPattern(), '', $_SERVER['REQUEST_URI']);
 
                     //  check if current path is valid
-                    if (1 === preg_match("#^$sPattern$#", $sCurrentPath)) {
+                    if (1 === preg_match("#^$sPattern$#", $sCurrentPath, $aMatchedParameters)) {
+                        // remove first parameter (matched route)
+                        array_shift($aMatchedParameters);
                         // if valid : redirect to page
-                        $this->setCurrentRoute($sRoute);
+                        $this->setCurrentRoute($sRoute, $aMatchedParameters);
                         $bFound = true;
                         break;
                     }
@@ -112,9 +118,10 @@ abstract class AbstractController {
      *
      * @param string $sCurrentRoute current route.
      */
-    public function setCurrentRoute (string $sCurrentRoute) {
+    public function setCurrentRoute (string $sCurrentRoute, array $aParameters = []) {
         if ($this->isRouteValid($sCurrentRoute)) {
             $this->sCurrentRoute = $sCurrentRoute;
+            $this->aRouteParameters = $aParameters;
         }
     }
 
@@ -139,7 +146,9 @@ abstract class AbstractController {
     private function getRouteData (): array {
         $sPage = $this->getCurrent() . 'Route';
 
-        return $this->$sPage();
+        $oMethod = new \ReflectionMethod($this, $sPage);
+
+        return $oMethod->invokeArgs($this, $this->aRouteParameters);
     }
 
     /**
