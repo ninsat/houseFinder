@@ -18,7 +18,12 @@ class FakeController extends AbstractController {
     public function autoSelectPage () {
     }
 
-    protected function validPage () {
+    /**
+     * @return array
+     *
+     * @path("")
+     */
+    public function validRoute () {
         return [
             'title' => 'this is a title'
         ];

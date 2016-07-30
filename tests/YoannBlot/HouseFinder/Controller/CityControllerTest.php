@@ -15,9 +15,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testIndexPage () {
         $oController = new CityController();
-        $oController->setCurrentPage('index');
+        $oController->setCurrentRoute('index');
 
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
+        $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('city', $aValidPageData);
         $this->assertInstanceOf(City::class, $aValidPageData['city']);
@@ -25,9 +25,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testHousesPage () {
         $oController = new CityController();
-        $oController->setCurrentPage('houses');
+        $oController->setCurrentRoute('houses');
 
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
+        $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('city', $aValidPageData);
         $this->assertInstanceOf(City::class, $aValidPageData['city']);
@@ -35,7 +35,7 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testDisplayPage () {
         $oController = new CityController();
-        $oController->setCurrentPage('index');
+        $oController->setCurrentRoute('index');
         $sOutput = $oController->displayPage();
 
         $this->assertNotEmpty($sOutput);

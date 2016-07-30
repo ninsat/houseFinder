@@ -22,15 +22,18 @@ class Kernel {
         $this->display();
     }
 
+    /**
+     * Display current page.
+     */
     private function display () {
         try {
             $oController = $this->selectController();
-            $sOutput = $oController->displayPage();
+            $oController->autoSelectPage();
         } catch (Redirect404Exception $oException) {
             $oController = new DefaultController();
-            $oController->setCurrentPage('notFound');
-            $sOutput = $oController->displayPage();
+            $oController->setCurrentRoute('notFound');
         }
+        $sOutput = $oController->displayPage();
 
         echo $sOutput;
     }
@@ -39,8 +42,9 @@ class Kernel {
      * Select right controller.
      *
      * @return AbstractController selected controller.
+     * @throws Redirect404Exception controller not found
      */
-    private function selectController (): AbstractController {
+    private function selectController () : AbstractController {
         $oSelectedController = null;
         $sPath = $_SERVER['REQUEST_URI'];
 
@@ -49,20 +53,19 @@ class Kernel {
                 $sControllerPath = str_replace([SRC_PATH, '.php'], '', $sControllerPath);
                 $sControllerPath = str_replace('/', '\\', $sControllerPath);
                 $oReflection = new \ReflectionClass($sControllerPath);
+                /** @var AbstractController $oController */
                 $oController = $oReflection->newInstance();
 
                 if ($oController->matchPath($sPath)) {
                     $oSelectedController = $oController;
-                    $oSelectedController->autoSelectPage();
                     break;
                 }
             }
         }
 
         if (null === $oSelectedController) {
-            $oSelectedController = new DefaultController();
-            $oSelectedController->setCurrentPage('notFound');
             Log::get()->warn("Path '$sPath' not found, redirect to 404 page.");
+            throw new Redirect404Exception("Path '$sPath' not found, redirect to 404 page.");
         }
 
         return $oSelectedController;

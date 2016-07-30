@@ -16,11 +16,14 @@ use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
  */
 class CityController extends AbstractController {
 
-    public function autoSelectPage () {
-        $this->setCurrentPage('houses');
-    }
-
-    public function indexPage () : array {
+    /**
+     * City page.
+     *
+     * @return array
+     *
+     * @path("/([0-9]+)")
+     */
+    public function indexRoute () : array {
         $oCityRepository = new CityRepository();
 
         $iCityId = 16;
@@ -33,7 +36,14 @@ class CityController extends AbstractController {
         ];
     }
 
-    public function housesPage () : array {
+    /**
+     * List of houses from city.
+     *
+     * @return array
+     *
+     * @path("/([0-9]+)/houses")
+     */
+    public function housesRoute () : array {
         $oCityRepository = new CityRepository();
         $oHouseRepository = new HouseRepository();
 

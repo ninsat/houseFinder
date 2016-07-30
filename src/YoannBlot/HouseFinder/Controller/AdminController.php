@@ -17,13 +17,6 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
 class AdminController extends AbstractController {
 
     /**
-     * @inheritdoc
-     */
-    public function autoSelectPage () {
-        $this->setCurrentPage('city');
-    }
-
-    /**
      * @return CityRepository current repository.
      */
     private function getRepository (): CityRepository {
@@ -34,8 +27,10 @@ class AdminController extends AbstractController {
      * @return array
      *
      * @throws Redirect404Exception
+     *
+     * @path("/city")
      */
-    protected function cityPage () : array {
+    public function cityRoute () : array {
         return [
             'cities' => $this->getRepository()->getAll()
         ];

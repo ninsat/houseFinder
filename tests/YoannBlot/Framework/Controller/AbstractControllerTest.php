@@ -20,22 +20,22 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetCurrentPage () {
         $oController = new FakeController();
-        $this->assertNotEmpty($oController->getCurrentPage());
-        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrentPage());
+        $this->assertNotEmpty($oController->getCurrent());
+        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
 
         // invalid page
-        $oController->setCurrentPage(static::INVALID_PAGE);
-        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrentPage());
+        $oController->setCurrentRoute(static::INVALID_PAGE);
+        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
 
         // valid page
-        $oController->setCurrentPage(static::VALID_PAGE);
-        $this->assertEquals(static::VALID_PAGE, $oController->getCurrentPage());
+        $oController->setCurrentRoute(static::VALID_PAGE);
+        $this->assertEquals(static::VALID_PAGE, $oController->getCurrent());
     }
 
     public function testIsValidPage () {
         $oController = new FakeController();
 
-        $oMethod = Reflection::getMethod($oController, "isValidPage");
+        $oMethod = Reflection::getMethod($oController, "isRouteValid");
 
         $this->assertFalse($oMethod->invoke($oController, static::INVALID_PAGE));
         $this->assertTrue($oMethod->invoke($oController, static::VALID_PAGE));
@@ -43,9 +43,9 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testGetPage () {
         $oController = new FakeController();
-        $oController->setCurrentPage('valid');
+        $oController->setCurrentRoute('valid');
 
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
+        $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('title', $aValidPageData);
     }

@@ -15,11 +15,12 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
  */
 class HomeController extends AbstractController {
 
-    public function autoSelectPage () {
-        $this->setCurrentPage('index');
-    }
-
-    public function indexPage () : array {
+    /**
+     * @return array
+     *
+     * @path("")
+     */
+    public function indexRoute () : array {
         $oCityRepository = new CityRepository();
 
         return [

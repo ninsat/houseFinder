@@ -115,7 +115,7 @@ class View {
     private function getViewPath () : string {
         $sDirectory = $this->getViewRootDirectory();
         $sDirectory .= $this->getCurrentClassName() . DIRECTORY_SEPARATOR;
-        $sDirectory .= $this->oControllerClass->getCurrentPage() . DIRECTORY_SEPARATOR;
+        $sDirectory .= $this->oControllerClass->getCurrent() . DIRECTORY_SEPARATOR;
 
         return $sDirectory;
     }
@@ -130,7 +130,7 @@ class View {
             $this->sCachePath .= 'cache' . DIRECTORY_SEPARATOR;
             $this->sCachePath .= 'View' . DIRECTORY_SEPARATOR;
             $this->sCachePath .= $this->getCurrentClassName() . DIRECTORY_SEPARATOR;
-            $this->sCachePath .= $this->oControllerClass->getCurrentPage() . DIRECTORY_SEPARATOR;
+            $this->sCachePath .= $this->oControllerClass->getCurrent() . DIRECTORY_SEPARATOR;
             $this->sCachePath .= 'template.cache' . static::TEMPLATE_EXT;
 
             Directory::create(dirname($this->sCachePath));

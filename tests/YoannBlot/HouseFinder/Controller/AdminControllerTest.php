@@ -15,9 +15,9 @@ class AdminControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testCityPage () {
         $oController = new AdminController();
-        $oController->setCurrentPage('city');
+        $oController->setCurrentRoute('city');
 
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
+        $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('cities', $aValidPageData);
         $this->assertContainsOnlyInstancesOf(City::class, $aValidPageData['cities']);
@@ -25,7 +25,7 @@ class AdminControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testDisplayPage () {
         $oController = new AdminController();
-        $oController->setCurrentPage('city');
+        $oController->setCurrentRoute('city');
         $sOutput = $oController->displayPage();
 
         $this->assertNotEmpty($sOutput);

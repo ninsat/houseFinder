@@ -16,7 +16,7 @@ class HomeControllerTest extends \PHPUnit_Framework_TestCase {
     public function testHomePage () {
         $oController = new HomeController();
 
-        $aValidPageData = Reflection::getValue($oController, "getPageData");
+        $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
         $this->assertArrayHasKey('cities', $aValidPageData);
         $this->assertContainsOnlyInstancesOf(City::class, $aValidPageData['cities']);

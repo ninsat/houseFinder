@@ -2,6 +2,7 @@
 
 namespace YoannBlot\Framework\Controller;
 
+use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\Framework\Utils\Log\Log;
 use YoannBlot\Framework\View\View;
 
@@ -21,7 +22,26 @@ abstract class AbstractController {
     /**
      * @var string current page
      */
-    private $sCurrentPage = self::DEFAULT_PAGE;
+    private $sCurrentRoute = self::DEFAULT_PAGE;
+
+    /**
+     * Get the controller pattern.
+     *
+     * @return string controller pattern.
+     */
+    private function getControllerPattern () : string {
+        $oReflectionClass = new \ReflectionClass($this);
+        $oDocComment = $oReflectionClass->getDocComment();
+        preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
+        if (count($aPathAnnotations[1]) > 0) {
+            $sControllerPattern = $aPathAnnotations[1][0];
+        } else {
+            $sControllerPattern = '';
+            Log::get()->error('You must add an annotation @path to your Controller ' . get_class($this));
+        }
+
+        return $sControllerPattern;
+    }
 
     /**
      * Check if given path is matching current controller.
@@ -31,51 +51,83 @@ abstract class AbstractController {
      * @return bool true if given path is matching current controller.
      */
     public function matchPath (string $sPath) : bool {
-        $oReflectionClass = new \ReflectionClass($this);
-        $oDocComment = $oReflectionClass->getDocComment();
-        preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
+        $sControllerPath = $this->getControllerPattern();
 
-        if (count($aPathAnnotations[1]) > 0) {
-            $sControllerPath = $aPathAnnotations[1][0];
+        if ('' !== $sControllerPath) {
             $bMatch = 0 === strpos($sPath, $sControllerPath);
         } else {
-            Log::get()->error('You must add an annotation @path to your Controller ' . get_class($this));
             $bMatch = false;
         }
 
         return $bMatch;
     }
 
-    public abstract function autoSelectPage ();
-
     /**
-     * @return string current page
-     */
-    public function getCurrentPage (): string {
-        return $this->sCurrentPage;
-    }
-
-    /**
-     * Set the new current page.
+     * Automatic selection of a page.
      *
-     * @param string $sCurrentPage current page.
+     * @throws Redirect404Exception
      */
-    public function setCurrentPage (string $sCurrentPage) {
-        if ($this->isValidPage($sCurrentPage)) {
-            $this->sCurrentPage = $sCurrentPage;
+    public function autoSelectPage () {
+        $oReflectionClass = new \ReflectionClass($this);
+        $bFound = false;
+        foreach ($oReflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $oMethod) {
+            // get all method xxxRoute()
+            if (false !== strrpos($oMethod->getName(), 'Route')) {
+                $sRoute = substr($oMethod->getName(), 0, strrpos($oMethod->getName(), 'Route'));
+                $sDocComment = $oMethod->getDocComment();
+                // get @path() from comment
+                preg_match_all('#@path\(\"(.*)\"\)#s', $sDocComment, $aPathAnnotations);
+                if (count($aPathAnnotations[1]) > 0) {
+                    $sPattern = $aPathAnnotations[1][0];
+
+                    // remove controller path from current path
+                    $sCurrentPath = str_replace($this->getControllerPattern(), '', $_SERVER['REQUEST_URI']);
+
+                    //  check if current path is valid
+                    if (1 === preg_match("#^$sPattern$#", $sCurrentPath)) {
+                        // if valid : redirect to page
+                        $this->setCurrentRoute($sRoute);
+                        $bFound = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        if (!$bFound) {
+            Log::get()->error("TEST : controller " . get_class($this));
+            throw new Redirect404Exception("No valid route in controller " . get_class($this));
         }
     }
 
     /**
-     * Check if the given page is valid or not.
+     * @return string current page/route
+     */
+    public function getCurrent (): string {
+        return $this->sCurrentRoute;
+    }
+
+    /**
+     * Set the new current route.
+     *
+     * @param string $sCurrentRoute current route.
+     */
+    public function setCurrentRoute (string $sCurrentRoute) {
+        if ($this->isRouteValid($sCurrentRoute)) {
+            $this->sCurrentRoute = $sCurrentRoute;
+        }
+    }
+
+    /**
+     * Check if the given route is valid or not.
      *
      * @param string $sPageName page name to check for validity.
      *
      * @return bool true if given page is valid, otherwise false.
      */
-    private function isValidPage (string $sPageName) : bool {
-        // check if method exists $sPageName.'Page'
-        $sMethodName = $sPageName . 'Page';
+    private function isRouteValid (string $sPageName) : bool {
+        // check if method exists $sPageName.'Route'
+        $sMethodName = $sPageName . 'Route';
         $bValid = method_exists($this, $sMethodName);
 
         return $bValid;
@@ -84,8 +136,8 @@ abstract class AbstractController {
     /**
      * @return array data to send to view page.
      */
-    private function getPageData (): array {
-        $sPage = $this->getCurrentPage() . 'Page';
+    private function getRouteData (): array {
+        $sPage = $this->getCurrent() . 'Route';
 
         return $this->$sPage();
     }
@@ -96,7 +148,7 @@ abstract class AbstractController {
     public function displayPage () {
         ob_start();
 
-        $oView = new View($this, $this->getPageData());
+        $oView = new View($this, $this->getRouteData());
         $oView->display();
 
         return ob_get_clean();
