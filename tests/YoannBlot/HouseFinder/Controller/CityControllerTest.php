@@ -14,8 +14,9 @@ use YoannBlot\HouseFinder\Model\Entity\City;
 class CityControllerTest extends \PHPUnit_Framework_TestCase {
 
     public function testIndexPage () {
+        $iCityId = 1;
         $oController = new CityController();
-        $oController->setCurrentRoute('index');
+        $oController->setCurrentRoute('index', [$iCityId]);
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
@@ -24,8 +25,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testHousesPage () {
+        $iCityId = 1;
         $oController = new CityController();
-        $oController->setCurrentRoute('houses');
+        $oController->setCurrentRoute('houses', [$iCityId]);
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
         $this->assertNotEmpty($aValidPageData);
@@ -34,8 +36,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
     }
 
     public function testDisplayPage () {
+        $iCityId = 1;
         $oController = new CityController();
-        $oController->setCurrentRoute('index');
+        $oController->setCurrentRoute('index', [$iCityId]);
         $sOutput = $oController->displayPage();
 
         $this->assertNotEmpty($sOutput);

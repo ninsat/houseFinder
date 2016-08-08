@@ -101,7 +101,6 @@ abstract class AbstractController {
         }
 
         if (!$bFound) {
-            Log::get()->error("TEST : controller " . get_class($this));
             throw new Redirect404Exception("No valid route in controller " . get_class($this));
         }
     }

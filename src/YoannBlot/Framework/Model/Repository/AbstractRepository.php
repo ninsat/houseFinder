@@ -33,7 +33,7 @@ abstract class AbstractRepository {
      *
      * @return string table name.
      */
-    protected function getTable (): string {
+    public function getTable (): string {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
         preg_match_all('#@table (.*)\n#s', $oDocComment, $aTable);
