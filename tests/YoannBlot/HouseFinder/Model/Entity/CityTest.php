@@ -2,6 +2,8 @@
 
 namespace YoannBlot\HouseFinder\Model\Entity;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Class CityTest
  *
@@ -10,7 +12,7 @@ namespace YoannBlot\HouseFinder\Model\Entity;
  *
  * @cover   City
  */
-class CityTest extends \PHPUnit_Framework_TestCase {
+class CityTest extends TestCase {
 
     /**
      * Test city name.
@@ -19,18 +21,18 @@ class CityTest extends \PHPUnit_Framework_TestCase {
         $oCity = new City();
 
         // default value
-        $this->assertEmpty($oCity->getName());
+        static::assertEmpty($oCity->getName());
 
         // invalid name
         $oCity->setName('');
-        $this->assertEmpty($oCity->getName());
+        static::assertEmpty($oCity->getName());
         $oCity->setName('te');
-        $this->assertEmpty($oCity->getName());
+        static::assertEmpty($oCity->getName());
 
         // valid name
         $sName = 'test';
         $oCity->setName($sName);
-        $this->assertEquals($sName, $oCity->getName());
+        static::assertEquals($sName, $oCity->getName());
     }
 
     /**
@@ -40,18 +42,18 @@ class CityTest extends \PHPUnit_Framework_TestCase {
         $oCity = new City();
 
         // default value
-        $this->assertEmpty($oCity->getPostalCode());
+        static::assertEmpty($oCity->getPostalCode());
 
         // invalid postal code
         $oCity->setPostalCode('');
-        $this->assertEmpty($oCity->getPostalCode());
+        static::assertEmpty($oCity->getPostalCode());
         $oCity->setPostalCode('te');
-        $this->assertEmpty($oCity->getPostalCode());
+        static::assertEmpty($oCity->getPostalCode());
 
         // valid postal code
         $sPostalCode = 'test';
         $oCity->setPostalCode($sPostalCode);
-        $this->assertEquals($sPostalCode, $oCity->getPostalCode());
+        static::assertEquals($sPostalCode, $oCity->getPostalCode());
     }
 
     /**
@@ -61,18 +63,18 @@ class CityTest extends \PHPUnit_Framework_TestCase {
         $oCity = new City();
 
         // default value
-        $this->assertTrue($oCity->isEnabled());
+        static::assertTrue($oCity->isEnabled());
 
         // invalid
         $oCity->setEnabled('');
-        $this->assertFalse($oCity->isEnabled());
+        static::assertFalse($oCity->isEnabled());
         $oCity->setEnabled(156);
-        $this->assertTrue($oCity->isEnabled());
+        static::assertTrue($oCity->isEnabled());
 
         // valid
         $oCity->setEnabled(false);
-        $this->assertFalse($oCity->isEnabled());
+        static::assertFalse($oCity->isEnabled());
         $oCity->setEnabled(true);
-        $this->assertTrue($oCity->isEnabled());
+        static::assertTrue($oCity->isEnabled());
     }
 }

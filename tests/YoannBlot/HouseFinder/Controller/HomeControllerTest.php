@@ -2,6 +2,7 @@
 
 namespace YoannBlot\HouseFinder\Controller;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Helper\Reflection;
 use YoannBlot\HouseFinder\Model\Entity\City;
 
@@ -11,21 +12,21 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  * @package YoannBlot\HouseFinder\Controller
  * @author  Yoann Blot
  */
-class HomeControllerTest extends \PHPUnit_Framework_TestCase {
+class HomeControllerTest extends TestCase {
 
     public function testHomePage () {
         $oController = new HomeController();
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
-        $this->assertNotEmpty($aValidPageData);
-        $this->assertArrayHasKey('cities', $aValidPageData);
-        $this->assertContainsOnlyInstancesOf(City::class, $aValidPageData['cities']);
+        static::assertNotEmpty($aValidPageData);
+        static::assertArrayHasKey('cities', $aValidPageData);
+        static::assertContainsOnlyInstancesOf(City::class, $aValidPageData['cities']);
     }
 
     public function testDisplayPage () {
         $oController = new HomeController();
         $sOutput = $oController->displayPage();
 
-        $this->assertNotEmpty($sOutput);
+        static::assertNotEmpty($sOutput);
     }
 }

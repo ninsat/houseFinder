@@ -2,6 +2,8 @@
 
 namespace YoannBlot\Framework\Validator;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Class BooleanTest
  *
@@ -10,15 +12,15 @@ namespace YoannBlot\Framework\Validator;
  *
  * @cover   Boolean
  */
-class BooleanTest extends \PHPUnit_Framework_TestCase {
+class BooleanTest extends TestCase {
 
     public function testGetValue () {
-        $this->assertTrue(Boolean::getValue(true));
-        $this->assertTrue(Boolean::getValue("true"));
-        $this->assertFalse(Boolean::getValue(false));
-        $this->assertFalse(Boolean::getValue("false"));
-        $this->assertTrue(Boolean::getValue(1));
-        $this->assertFalse(Boolean::getValue(0));
+        static::assertTrue(Boolean::getValue(true));
+        static::assertTrue(Boolean::getValue("true"));
+        static::assertFalse(Boolean::getValue(false));
+        static::assertFalse(Boolean::getValue("false"));
+        static::assertTrue(Boolean::getValue(1));
+        static::assertFalse(Boolean::getValue(0));
     }
 
 }

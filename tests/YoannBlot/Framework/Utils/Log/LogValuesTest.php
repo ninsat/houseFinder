@@ -2,24 +2,26 @@
 
 namespace YoannBlot\Framework\Utils\Log;
 
-class LogValuesTest extends \PHPUnit_Framework_TestCase {
+use PHPUnit\Framework\TestCase;
+
+class LogValuesTest extends TestCase {
 
     public function testGetValid () {
-        $this->assertEquals(LogValues::DEBUG, LogValues::get('debug'));
-        $this->assertEquals(LogValues::DEBUG, LogValues::get('DEBUG'));
+        static::assertEquals(LogValues::DEBUG, LogValues::get('debug'));
+        static::assertEquals(LogValues::DEBUG, LogValues::get('DEBUG'));
 
-        $this->assertEquals(LogValues::INFO, LogValues::get('info'));
-        $this->assertEquals(LogValues::INFO, LogValues::get('INFO'));
+        static::assertEquals(LogValues::INFO, LogValues::get('info'));
+        static::assertEquals(LogValues::INFO, LogValues::get('INFO'));
 
-        $this->assertEquals(LogValues::WARN, LogValues::get('WARN'));
-        $this->assertEquals(LogValues::WARN, LogValues::get('warn'));
+        static::assertEquals(LogValues::WARN, LogValues::get('WARN'));
+        static::assertEquals(LogValues::WARN, LogValues::get('warn'));
 
-        $this->assertEquals(LogValues::ERROR, LogValues::get('error'));
-        $this->assertEquals(LogValues::ERROR, LogValues::get('ERROR'));
+        static::assertEquals(LogValues::ERROR, LogValues::get('error'));
+        static::assertEquals(LogValues::ERROR, LogValues::get('ERROR'));
     }
 
     public function testGetInvalid () {
-        $this->assertEquals(LogValues::NULL, LogValues::get('fail'));
-        $this->assertEquals(LogValues::NULL, LogValues::get('wrong log format'));
+        static::assertEquals(LogValues::NULL, LogValues::get('fail'));
+        static::assertEquals(LogValues::NULL, LogValues::get('wrong log format'));
     }
 }

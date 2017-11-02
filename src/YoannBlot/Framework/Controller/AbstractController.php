@@ -33,7 +33,7 @@ abstract class AbstractController {
      *
      * @return string controller pattern.
      */
-    private function getControllerPattern () : string {
+    private function getControllerPattern (): string {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
         preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
@@ -54,7 +54,7 @@ abstract class AbstractController {
      *
      * @return bool true if given path is matching current controller.
      */
-    public function matchPath (string $sPath) : bool {
+    public function matchPath (string $sPath): bool {
         $sControllerPath = $this->getControllerPattern();
 
         if ('' !== $sControllerPath) {
@@ -116,6 +116,7 @@ abstract class AbstractController {
      * Set the new current route.
      *
      * @param string $sCurrentRoute current route.
+     * @param array $aParameters parameters to route.
      */
     public function setCurrentRoute (string $sCurrentRoute, array $aParameters = []) {
         if ($this->isRouteValid($sCurrentRoute)) {
@@ -131,7 +132,7 @@ abstract class AbstractController {
      *
      * @return bool true if given page is valid, otherwise false.
      */
-    private function isRouteValid (string $sPageName) : bool {
+    private function isRouteValid (string $sPageName): bool {
         // check if method exists $sPageName.'Route'
         $sMethodName = $sPageName . 'Route';
         $bValid = method_exists($this, $sMethodName);

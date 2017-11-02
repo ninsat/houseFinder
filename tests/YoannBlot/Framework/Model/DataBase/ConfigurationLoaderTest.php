@@ -2,7 +2,9 @@
 
 namespace Framework\Model\DataBase;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Model\DataBase\ConfigurationLoader;
+use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
 
 /**
  * Class ConfigurationLoaderTest
@@ -10,18 +12,20 @@ use YoannBlot\Framework\Model\DataBase\ConfigurationLoader;
  * @package Framework\Model\DataBase
  * @author  Yoann Blot
  */
-class ConfigurationLoaderTest extends \PHPUnit_Framework_TestCase {
+class ConfigurationLoaderTest extends TestCase {
 
     public function testLoad () {
-        ConfigurationLoader::get();
+        $oConfiguration = ConfigurationLoader::get();
+        static::assertNotNull($oConfiguration);
+        static::assertInstanceOf(DataBaseConfig::class, $oConfiguration);
     }
 
     public function testGet () {
         $oConfig = ConfigurationLoader::get();
-        $this->assertNotNull($oConfig);
-        $this->assertNotNull($oConfig->getHost());
-        $this->assertNotNull($oConfig->getPort());
-        $this->assertNotNull($oConfig->getUsername());
-        $this->assertNotNull($oConfig->getPassword());
+        static::assertNotNull($oConfig);
+        static::assertNotNull($oConfig->getHost());
+        static::assertNotNull($oConfig->getPort());
+        static::assertNotNull($oConfig->getUsername());
+        static::assertNotNull($oConfig->getPassword());
     }
 }

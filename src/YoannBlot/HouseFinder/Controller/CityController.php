@@ -19,11 +19,12 @@ class CityController extends AbstractController {
     /**
      * City page.
      *
+     * @param int $iCityId city id.
      * @return array
      *
      * @path("/([0-9]+)")
      */
-    public function indexRoute (int $iCityId) : array {
+    public function indexRoute (int $iCityId): array {
         $oCityRepository = new CityRepository();
 
         $oCity = $oCityRepository->get($iCityId);
@@ -36,11 +37,12 @@ class CityController extends AbstractController {
     /**
      * List of houses from city.
      *
+     * @param int $iCityId city id.
      * @return array
      *
      * @path("/([0-9]+)/houses")
      */
-    public function housesRoute (int $iCityId) : array {
+    public function housesRoute (int $iCityId): array {
         $oCityRepository = new CityRepository();
         $oHouseRepository = new HouseRepository();
 

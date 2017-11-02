@@ -2,6 +2,7 @@
 
 namespace YoannBlot\Framework\Utils\Log;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Helper\Reflection;
 
 /**
@@ -10,13 +11,13 @@ use YoannBlot\Framework\Helper\Reflection;
  * @package YoannBlot\Framework\Utils\Log
  * @author  Yoann Blot
  */
-class LogTest extends \PHPUnit_Framework_TestCase {
+class LogTest extends TestCase {
 
     /**
      * Test logger initialization.
      */
     public function testInitialization () {
-        $this->assertNotNull(Log::get());
+        static::assertNotNull(Log::get());
     }
 
     /**
@@ -24,18 +25,18 @@ class LogTest extends \PHPUnit_Framework_TestCase {
      */
     public function testSetLevel () {
         // default level
-        $this->assertEquals(Log::DEFAULT_MODE, Log::get()->getLevel());
+        static::assertEquals(Log::DEFAULT_MODE, Log::get()->getLevel());
 
         // change level to existing
         Log::get()->setLevel('DEBUG');
-        $this->assertEquals(LogValues::DEBUG, Log::get()->getLevel());
+        static::assertEquals(LogValues::DEBUG, Log::get()->getLevel());
         // lower
         Log::get()->setLevel('info');
-        $this->assertEquals(LogValues::INFO, Log::get()->getLevel());
+        static::assertEquals(LogValues::INFO, Log::get()->getLevel());
 
         // change level to non existing
         Log::get()->setLevel('FAKE');
-        $this->assertNotEquals(0, Log::get()->getLevel());
+        static::assertNotEquals(0, Log::get()->getLevel());
     }
 
     /**
@@ -53,9 +54,9 @@ class LogTest extends \PHPUnit_Framework_TestCase {
 
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, $sMessage));
+        static::assertTrue(false !== strpos($sLogContent, $sMessage));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 
     public function testDebugMessage () {
@@ -69,9 +70,9 @@ class LogTest extends \PHPUnit_Framework_TestCase {
         $sFileName = Reflection::getValue($oLogger, 'getFile');
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, $sMessage));
+        static::assertTrue(false !== strpos($sLogContent, $sMessage));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 
     public function testInfoMessage () {
@@ -85,9 +86,9 @@ class LogTest extends \PHPUnit_Framework_TestCase {
         $sFileName = Reflection::getValue($oLogger, 'getFile');
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, $sMessage));
+        static::assertTrue(false !== strpos($sLogContent, $sMessage));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 
     public function testWarningMessage () {
@@ -101,9 +102,9 @@ class LogTest extends \PHPUnit_Framework_TestCase {
         $sFileName = Reflection::getValue($oLogger, 'getFile');
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, $sMessage));
+        static::assertTrue(false !== strpos($sLogContent, $sMessage));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 
     public function testErrorMessage () {
@@ -117,9 +118,9 @@ class LogTest extends \PHPUnit_Framework_TestCase {
         $sFileName = Reflection::getValue($oLogger, 'getFile');
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, $sMessage));
+        static::assertTrue(false !== strpos($sLogContent, $sMessage));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 
     /**
@@ -139,11 +140,11 @@ class LogTest extends \PHPUnit_Framework_TestCase {
         $sFileName = Reflection::getValue($oLogger, 'getFile');
         $sLogContent = file_get_contents($sFileName);
         // message should be found in log file
-        $this->assertTrue(false !== strpos($sLogContent, 'DEBUG'));
-        $this->assertTrue(false !== strpos($sLogContent, 'INFO'));
-        $this->assertTrue(false !== strpos($sLogContent, 'WARN'));
-        $this->assertTrue(false !== strpos($sLogContent, 'ERROR'));
+        static::assertTrue(false !== strpos($sLogContent, 'DEBUG'));
+        static::assertTrue(false !== strpos($sLogContent, 'INFO'));
+        static::assertTrue(false !== strpos($sLogContent, 'WARN'));
+        static::assertTrue(false !== strpos($sLogContent, 'ERROR'));
         // remove file
-        $this->assertTrue(unlink($sFileName));
+        static::assertTrue(unlink($sFileName));
     }
 }

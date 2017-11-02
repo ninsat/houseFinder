@@ -2,12 +2,14 @@
 
 namespace YoannBlot\Framework\Utils\File;
 
+use PHPUnit\Framework\TestCase;
+
 /**
  * Class DirectoryTest
  *
  * @package YoannBlot\Framework\Utils\File
  */
-class DirectoryTest extends \PHPUnit_Framework_TestCase {
+class DirectoryTest extends TestCase {
 
     const DIR = TESTS_PATH . 'Resources' . DIRECTORY_SEPARATOR;
 
@@ -16,15 +18,15 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase {
      */
     public function testCreate () {
         // wrong directory name
-        $this->assertFalse(Directory::create(''));
+        static::assertFalse(Directory::create(''));
 
         if (is_dir(self::DIR)) {
             Directory::delete(self::DIR);
         }
-        $this->assertTrue(Directory::create(self::DIR));
-        $this->assertTrue(is_dir(self::DIR));
+        static::assertTrue(Directory::create(self::DIR));
+        static::assertTrue(is_dir(self::DIR));
 
-        $this->assertTrue(rmdir(self::DIR));
+        static::assertTrue(rmdir(self::DIR));
     }
 
     /**
@@ -32,9 +34,9 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase {
      */
     public function testClean () {
         // clean non existing directory
-        $this->assertTrue(Directory::delete(self::DIR));
+        static::assertTrue(Directory::delete(self::DIR));
 
-        $this->assertTrue(Directory::create(self::DIR));
+        static::assertTrue(Directory::create(self::DIR));
         $iSize = 12;
 
         // write $iSize files
@@ -43,9 +45,9 @@ class DirectoryTest extends \PHPUnit_Framework_TestCase {
         }
 
         // clean directory
-        $this->assertTrue(Directory::delete(self::DIR));
+        static::assertTrue(Directory::delete(self::DIR));
 
         // check that directory doesn't exist anymore
-        $this->assertFalse(is_dir(self::DIR));
+        static::assertFalse(is_dir(self::DIR));
     }
 }

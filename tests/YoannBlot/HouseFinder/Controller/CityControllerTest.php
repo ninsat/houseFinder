@@ -2,6 +2,7 @@
 
 namespace YoannBlot\HouseFinder\Controller;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Helper\Reflection;
 use YoannBlot\HouseFinder\Model\Entity\City;
 
@@ -11,7 +12,7 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  * @package YoannBlot\HouseFinder\Controller
  * @author  Yoann Blot
  */
-class CityControllerTest extends \PHPUnit_Framework_TestCase {
+class CityControllerTest extends TestCase {
 
     public function testIndexPage () {
         $iCityId = 1;
@@ -19,9 +20,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
         $oController->setCurrentRoute('index', [$iCityId]);
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
-        $this->assertNotEmpty($aValidPageData);
-        $this->assertArrayHasKey('city', $aValidPageData);
-        $this->assertInstanceOf(City::class, $aValidPageData['city']);
+        static::assertNotEmpty($aValidPageData);
+        static::assertArrayHasKey('city', $aValidPageData);
+        static::assertInstanceOf(City::class, $aValidPageData['city']);
     }
 
     public function testHousesPage () {
@@ -30,9 +31,9 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
         $oController->setCurrentRoute('houses', [$iCityId]);
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
-        $this->assertNotEmpty($aValidPageData);
-        $this->assertArrayHasKey('city', $aValidPageData);
-        $this->assertInstanceOf(City::class, $aValidPageData['city']);
+        static::assertNotEmpty($aValidPageData);
+        static::assertArrayHasKey('city', $aValidPageData);
+        static::assertInstanceOf(City::class, $aValidPageData['city']);
     }
 
     public function testDisplayPage () {
@@ -41,6 +42,6 @@ class CityControllerTest extends \PHPUnit_Framework_TestCase {
         $oController->setCurrentRoute('index', [$iCityId]);
         $sOutput = $oController->displayPage();
 
-        $this->assertNotEmpty($sOutput);
+        static::assertNotEmpty($sOutput);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Framework\Model\DataBase;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Helper\Reflection;
 use YoannBlot\Framework\Model\DataBase\Connector;
 use YoannBlot\Framework\Model\Entity\Fake;
@@ -13,7 +14,7 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
  * Class ConnectorTest
  * @package Framework\Model\DataBase
  */
-class ConnectorTest extends \PHPUnit_Framework_TestCase {
+class ConnectorTest extends TestCase {
 
     /**
      * @var Connector
@@ -23,17 +24,17 @@ class ConnectorTest extends \PHPUnit_Framework_TestCase {
     protected function setUp () {
         $this->oConnector = Connector::get();
         Reflection::getValue($this->oConnector, 'initConnection');
-        $this->assertTrue(Reflection::getValue($this->oConnector, 'isConnected'));
+        static::assertTrue(Reflection::getValue($this->oConnector, 'isConnected'));
     }
 
     public function testClose () {
         $this->oConnector->close();
-        $this->assertFalse(Reflection::getValue($this->oConnector, 'isConnected'));
+        static::assertFalse(Reflection::getValue($this->oConnector, 'isConnected'));
     }
 
     public function testDestructor () {
         $this->oConnector->__destruct();
-        $this->assertFalse(Reflection::getValue($this->oConnector, 'isConnected'));
+        static::assertFalse(Reflection::getValue($this->oConnector, 'isConnected'));
     }
 
     public function testQuerySingleFail () {

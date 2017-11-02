@@ -2,6 +2,7 @@
 
 namespace YoannBlot\Framework\Controller;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Helper\Reflection;
 
 /**
@@ -10,7 +11,7 @@ use YoannBlot\Framework\Helper\Reflection;
  * @package YoannBlot\Framework\Controller
  * @author  Yoann Blot
  */
-class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
+class AbstractControllerTest extends TestCase {
 
     const VALID_PAGE = 'valid';
     const INVALID_PAGE = 'fakeXC';
@@ -20,16 +21,16 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
      */
     public function testGetCurrentPage () {
         $oController = new FakeController();
-        $this->assertNotEmpty($oController->getCurrent());
-        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
+        static::assertNotEmpty($oController->getCurrent());
+        static::assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
 
         // invalid page
         $oController->setCurrentRoute(static::INVALID_PAGE);
-        $this->assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
+        static::assertEquals(AbstractController::DEFAULT_PAGE, $oController->getCurrent());
 
         // valid page
         $oController->setCurrentRoute(static::VALID_PAGE);
-        $this->assertEquals(static::VALID_PAGE, $oController->getCurrent());
+        static::assertEquals(static::VALID_PAGE, $oController->getCurrent());
     }
 
     public function testIsValidPage () {
@@ -37,8 +38,8 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
         $oMethod = Reflection::getMethod($oController, "isRouteValid");
 
-        $this->assertFalse($oMethod->invoke($oController, static::INVALID_PAGE));
-        $this->assertTrue($oMethod->invoke($oController, static::VALID_PAGE));
+        static::assertFalse($oMethod->invoke($oController, static::INVALID_PAGE));
+        static::assertTrue($oMethod->invoke($oController, static::VALID_PAGE));
     }
 
     public function testGetPage () {
@@ -46,8 +47,8 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
         $oController->setCurrentRoute('valid');
 
         $aValidPageData = Reflection::getValue($oController, "getRouteData");
-        $this->assertNotEmpty($aValidPageData);
-        $this->assertArrayHasKey('title', $aValidPageData);
+        static::assertNotEmpty($aValidPageData);
+        static::assertArrayHasKey('title', $aValidPageData);
     }
 
     public function testMatchPath () {
@@ -55,8 +56,8 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
 
         $oMethod = Reflection::getMethod($oController, "matchPath");
 
-        $this->assertFalse($oMethod->invoke($oController, 'wrong'));
-        $this->assertTrue($oMethod->invoke($oController, '/fake/'));
+        static::assertFalse($oMethod->invoke($oController, 'wrong'));
+        static::assertTrue($oMethod->invoke($oController, '/fake/'));
     }
 
     public function testMatchPathWithoutPath () {
@@ -65,13 +66,13 @@ class AbstractControllerTest extends \PHPUnit_Framework_TestCase {
         $oMethod = Reflection::getMethod($oController, "matchPath");
 
         $_SERVER['REQUEST_URI'] = '';
-        $this->assertFalse($oMethod->invoke($oController, ''));
+        static::assertFalse($oMethod->invoke($oController, ''));
 
         $_SERVER['REQUEST_URI'] = 'wrong';
-        $this->assertFalse($oMethod->invoke($oController, 'wrong'));
+        static::assertFalse($oMethod->invoke($oController, 'wrong'));
 
         $_SERVER['REQUEST_URI'] = '/fake/';
-        $this->assertFalse($oMethod->invoke($oController, '/fake/'));
+        static::assertFalse($oMethod->invoke($oController, '/fake/'));
     }
 
 }

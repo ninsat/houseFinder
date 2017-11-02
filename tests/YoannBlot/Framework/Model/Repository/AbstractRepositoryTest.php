@@ -2,6 +2,7 @@
 
 namespace YoannBlot\Framework\Model\Repository;
 
+use PHPUnit\Framework\TestCase;
 use YoannBlot\Framework\Model\Exception\QueryException;
 
 /**
@@ -10,7 +11,7 @@ use YoannBlot\Framework\Model\Exception\QueryException;
  * @package YoannBlot\Framework\Model\Repository
  * @author  Yoann Blot
  */
-class AbstractRepositoryTest extends \PHPUnit_Framework_TestCase {
+class AbstractRepositoryTest extends TestCase {
 
     public function testGet () {
         $oRepository = new FakeRepository();
@@ -22,7 +23,7 @@ class AbstractRepositoryTest extends \PHPUnit_Framework_TestCase {
     public function testGetAll () {
         $oRepository = new FakeRepository();
         $aObjects = $oRepository->getAll();
-        $this->assertNotNull($aObjects);
-        $this->assertCount(0, $aObjects);
+        static::assertNotNull($aObjects);
+        static::assertCount(0, $aObjects);
     }
 }
