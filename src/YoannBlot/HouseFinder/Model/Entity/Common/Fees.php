@@ -17,7 +17,7 @@ trait Fees {
     /**
      * @return float
      */
-    public function getFees (): float {
+    public function getFees (): ?float {
         return $this->fees;
     }
 

@@ -2,6 +2,8 @@
 
 namespace YoannBlot\Framework\Model\Entity;
 
+use YoannBlot\Framework\Model\Repository\AbstractRepository;
+
 /**
  * Class AbstractEntity.
  * All entities should extend this class.
@@ -19,6 +21,11 @@ abstract class AbstractEntity {
     protected $id = self::DEFAULT_ID;
 
     /**
+     * @var array waiting links.
+     */
+    private $aLinks = [];
+
+    /**
      * @return int
      */
     public function getId (): int {
@@ -32,4 +39,31 @@ abstract class AbstractEntity {
         $this->id = $iId;
     }
 
+    /**
+     * Add necessary links.
+     */
+    public function addLinks () {
+        if (count($this->aLinks) > 0) {
+            foreach ($this->aLinks as $sLinkName => $iLinkValue) {
+                $sRepositoryName = "YoannBlot\HouseFinder\Model\Repository\\" . ucfirst($sLinkName) . 'Repository';
+                /** @var AbstractRepository $oRepository */
+                $oRepository = new $sRepositoryName();
+                $oLinkedObject = $oRepository->get($iLinkValue);
+                if (null !== $oLinkedObject) {
+                    $sLinkSetter = 'set' . ucfirst($sLinkName);
+                    $this->$sLinkSetter($oLinkedObject);
+                }
+            }
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function __set ($name, $value) {
+        $iIdPosition = strpos($name, '_id');
+        if (!property_exists($this, $name) && false !== $iIdPosition) {
+            $this->aLinks [ substr($name, 0, $iIdPosition) ] = intval($value);
+        }
+    }
 }

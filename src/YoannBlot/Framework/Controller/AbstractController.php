@@ -33,7 +33,7 @@ abstract class AbstractController {
      *
      * @return string controller pattern.
      */
-    private function getControllerPattern (): string {
+    public function getControllerPattern (): string {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
         preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);

@@ -22,7 +22,7 @@ class Connector {
     /**
      * @return Connector current connector.
      */
-    public static function get () : Connector {
+    public static function get (): Connector {
         if (null === static::$oCurrent) {
             static::$oCurrent = new Connector();
         }
@@ -57,14 +57,14 @@ class Connector {
     /**
      * @return \PDO database connection object.
      */
-    private function getConnection () : \PDO {
+    private function getConnection (): \PDO {
         return $this->oConnection;
     }
 
     /**
      * @return bool true if connected to database, otherwise false.
      */
-    private function isConnected () : bool {
+    private function isConnected (): bool {
         return null !== $this->oConnection && $this->oConnection instanceof \PDO;
     }
 
@@ -87,7 +87,7 @@ class Connector {
     /**
      * Query a single object.
      *
-     * @param string $sQuery     query to execute
+     * @param string $sQuery query to execute
      * @param string $sClassName entity class name
      *
      * @return AbstractEntity matched entity if found, otherwise null.
@@ -104,6 +104,7 @@ class Connector {
         if (false === $oObject) {
             throw new EntityNotFoundException();
         }
+        $oObject->addLinks();
 
         return $oObject;
     }
@@ -111,7 +112,7 @@ class Connector {
     /**
      * Query multiple objects.
      *
-     * @param string $sQuery     query to execute.
+     * @param string $sQuery query to execute.
      * @param string $sClassName entity class name
      *
      * @return AbstractEntity[] matched entities as array.

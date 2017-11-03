@@ -50,6 +50,7 @@ class CityController extends AbstractController {
         $oLastHouses = $oHouseRepository->getLast($oCity);
 
         return [
+            'cities' => $oCityRepository->getAll(),
             'city'   => $oCity,
             'houses' => $oLastHouses
         ];

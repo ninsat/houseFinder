@@ -26,12 +26,12 @@ class HouseRepository extends AbstractRepository {
     /**
      * Get last houses of a city.
      *
-     * @param City $oCity  city to retrieve houses.
-     * @param int  $iLimit limit of houses to get.
+     * @param City $oCity city to retrieve houses.
+     * @param int $iLimit limit of houses to get.
      *
      * @return House[] last houses of city.
      */
-    public function getLast (City $oCity, int $iLimit = 10) : array {
+    public function getLast (City $oCity, int $iLimit = 10): array {
         $sWhere = 'WHERE enabled = 1 AND city_id = ' . $oCity->getId();
         $sOrderBy = 'date desc';
 

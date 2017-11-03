@@ -17,7 +17,7 @@ trait Guarantee {
     /**
      * @return float
      */
-    public function getGuarantee (): float {
+    public function getGuarantee (): ?float {
         return $this->guarantee;
     }
 

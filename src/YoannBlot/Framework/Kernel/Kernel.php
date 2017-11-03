@@ -44,21 +44,24 @@ class Kernel {
      * @return AbstractController selected controller.
      * @throws Redirect404Exception controller not found
      */
-    private function selectController () : AbstractController {
+    private function selectController (): AbstractController {
+        /** @var AbstractController $oSelectedController */
         $oSelectedController = null;
         $sPath = $_SERVER['REQUEST_URI'];
 
-        foreach (glob(SRC_PATH . '*/*/Controller/*Controller.php') as $sControllerPath) {
+        $aControllers = glob(SRC_PATH . 'YoannBlot/*/Controller/*Controller.php');
+
+        foreach ($aControllers as $sControllerPath) {
             if (false === strpos($sControllerPath, 'Abstract')) {
                 $sControllerPath = str_replace([SRC_PATH, '.php'], '', $sControllerPath);
                 $sControllerPath = str_replace('/', '\\', $sControllerPath);
                 $oReflection = new \ReflectionClass($sControllerPath);
-                /** @var AbstractController $oController */
-                $oController = $oReflection->newInstance();
 
-                if ($oController->matchPath($sPath)) {
-                    $oSelectedController = $oController;
-                    break;
+                $oController = $oReflection->newInstance();
+                if ($oController instanceof AbstractController && $oController->matchPath($sPath)) {
+                    if (null === $oSelectedController || strlen($oController->getControllerPattern()) > strlen($oSelectedController->getControllerPattern())) {
+                        $oSelectedController = $oController;
+                    }
                 }
             }
         }
