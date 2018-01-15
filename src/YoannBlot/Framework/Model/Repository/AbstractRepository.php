@@ -19,7 +19,8 @@ abstract class AbstractRepository {
     /**
      * @return string current entity class.
      */
-    protected function getEntityClass () : string {
+    public function getEntityClass(): string
+    {
         $sClassName = get_class($this);
         $sClassName = substr($sClassName, 0, strrpos($sClassName, 'Repository'));
         $sClassName = str_replace('\\Repository\\', '\\Entity\\', $sClassName);
@@ -89,6 +90,7 @@ abstract class AbstractRepository {
      *
      * @return AbstractEntity matched entity.
      * @throws EntityNotFoundException if entity was not found.
+     * @throws QueryException error in query.
      */
     public function get (int $iId) : AbstractEntity {
         $sQuery = '';
