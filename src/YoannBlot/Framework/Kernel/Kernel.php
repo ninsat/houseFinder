@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Kernel;
 
@@ -7,7 +8,7 @@ use YoannBlot\Framework\Command\Exception\CommandNotFoundException;
 use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Controller\DefaultController;
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
-use YoannBlot\Framework\Utils\Log\Log;
+use YoannBlot\Framework\DependencyInjection\Container;
 
 /**
  * Class Kernel
@@ -17,6 +18,10 @@ use YoannBlot\Framework\Utils\Log\Log;
  */
 class Kernel
 {
+    /**
+     * @var Container service container.
+     */
+    private $oContainer = null;
 
     /**
      * Kernel constructor.
@@ -31,6 +36,17 @@ class Kernel
     }
 
     /**
+     * @return Container service container.
+     */
+    private function getContainer(): Container
+    {
+        if (null === $this->oContainer) {
+            $this->oContainer = new Container();
+        }
+        return $this->oContainer;
+    }
+
+    /**
      * Display current page.
      */
     private function display()
@@ -38,11 +54,16 @@ class Kernel
         try {
             $oController = $this->selectController();
             $oController->autoSelectPage();
+            $sOutput = $oController->displayPage();
         } catch (Redirect404Exception $oException) {
-            $oController = new DefaultController();
-            $oController->setCurrentRoute('notFound');
+            $oController = new DefaultController($this->getContainer()->getLogger(), false);
+            $oController->setCurrentRoute(DefaultController::NOT_FOUND);
+            try {
+                $sOutput = $oController->displayPage();
+            } catch (Redirect404Exception $oException) {
+                $sOutput = '';
+            }
         }
-        $sOutput = $oController->displayPage();
 
         echo $sOutput;
     }
@@ -55,30 +76,11 @@ class Kernel
      */
     private function selectController(): AbstractController
     {
-        /** @var AbstractController $oSelectedController */
-        $oSelectedController = null;
-        $sPath = array_key_exists('REQUEST_URI', $_SERVER) ? $_SERVER['REQUEST_URI'] : null;
-
-        if (null !== $sPath) {
-            $aControllers = glob(SRC_PATH . 'YoannBlot/*/Controller/*Controller.php');
-            foreach ($aControllers as $sControllerPath) {
-                if (false === strpos($sControllerPath, 'Abstract')) {
-                    $sControllerPath = str_replace([SRC_PATH, '.php'], '', $sControllerPath);
-                    $sControllerPath = str_replace('/', '\\', $sControllerPath);
-                    $oReflection = new \ReflectionClass($sControllerPath);
-
-                    $oController = $oReflection->newInstance();
-                    if ($oController instanceof AbstractController && $oController->matchPath($sPath)) {
-                        if (null === $oSelectedController || strlen($oController->getControllerPattern()) > strlen($oSelectedController->getControllerPattern())) {
-                            $oSelectedController = $oController;
-                        }
-                    }
-                }
-            }
-        }
+        $sPath = array_key_exists('REQUEST_URI', $_SERVER) ? $_SERVER['REQUEST_URI'] : '';
+        $oSelectedController = $this->getContainer()->getController($sPath);
 
         if (null === $oSelectedController) {
-            Log::get()->warn("Path '$sPath' not found, redirect to 404 page.");
+            $this->getContainer()->getLogger()->warning("Path '$sPath' not found, redirect to 404 page.");
             throw new Redirect404Exception("Path '$sPath' not found, redirect to 404 page.");
         }
 
@@ -88,36 +90,16 @@ class Kernel
     /**
      * Select the right command from arguments.
      *
-     * @param array $argv command arguments.
+     * @param string $sCommandName command name.
      *
      * @return AbstractCommand command.
      * @throws CommandNotFoundException command not found.
      */
-    private function selectCommand(array $argv): AbstractCommand
+    private function selectCommand(string $sCommandName): ?AbstractCommand
     {
-        /** @var AbstractCommand $oSelectedCommand */
-        $oSelectedCommand = null;
-        $sCommandName = '';
-        if (count($argv) > 1) {
-            $sCommandName = $argv[1];
-
-            $aCommands = glob(SRC_PATH . 'YoannBlot/*/Command/*/*Command.php');
-            foreach ($aCommands as $sCommandPath) {
-                if (false === strpos($sCommandPath, 'Abstract')) {
-                    $sCommandPath = str_replace([SRC_PATH, '.php'], '', $sCommandPath);
-                    $sCommandPath = str_replace('/', '\\', $sCommandPath);
-                    $oReflection = new \ReflectionClass($sCommandPath);
-
-                    $oCommand = $oReflection->newInstance();
-                    if ($oCommand instanceof AbstractCommand && $sCommandName === $oCommand->getName()) {
-                        $oSelectedCommand = $oCommand;
-                    }
-                }
-            }
-        }
-
+        $oSelectedCommand = $this->getContainer()->getCommand($sCommandName);
         if (null === $oSelectedCommand) {
-            Log::get()->warn("Command '$sCommandName' not found.");
+            $this->getContainer()->getLogger()->warning("Command '$sCommandName' not found.");
             throw new CommandNotFoundException("Command '$sCommandName' not found.");
         }
 
@@ -132,11 +114,11 @@ class Kernel
     public function runCommand(array $argv): void
     {
         try {
-            $oCommand = $this->selectCommand($argv);
+            $oCommand = $this->selectCommand($argv[1]);
             if ($oCommand->run()) {
-                Log::get()->info("Command " . get_class($oCommand) . " run with success");
+                $this->getContainer()->getLogger()->info("Command " . get_class($oCommand) . " run with success");
             } else {
-                Log::get()->error("Error running command " . get_class($oCommand));
+                $this->getContainer()->getLogger()->error("Error running command " . get_class($oCommand));
             }
         } catch (CommandNotFoundException $oException) {
             echo "Cannot run command : " . $oException->getMessage();

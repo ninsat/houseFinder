@@ -1,12 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\Repository;
 
-use YoannBlot\Framework\Model\DataBase\Connector;
+use Psr\Log\LoggerInterface;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
-use YoannBlot\Framework\Utils\Log\Log;
+use YoannBlot\Framework\Service\DatabaseConnector\ConnectorInterface;
+use YoannBlot\Framework\Service\DatabaseConnector\ConnectorTrait;
+use YoannBlot\Framework\Service\Logger\LoggerTrait;
 
 /**
  * Class AbstractRepository
@@ -14,7 +17,22 @@ use YoannBlot\Framework\Utils\Log\Log;
  * @package YoannBlot\Framework\Model\Repository
  * @author  Yoann Blot
  */
-abstract class AbstractRepository {
+abstract class AbstractRepository
+{
+
+    use LoggerTrait, ConnectorTrait;
+
+    /**
+     * AbstractCommand constructor.
+     *
+     * @param LoggerInterface $oLoggerService logger.
+     * @param ConnectorInterface $oConnectorService connector service.
+     */
+    public function __construct(LoggerInterface $oLoggerService, ConnectorInterface $oConnectorService)
+    {
+        $this->oLogger = $oLoggerService;
+        $this->oConnector = $oConnectorService;
+    }
 
     /**
      * @return string current entity class.
@@ -34,7 +52,8 @@ abstract class AbstractRepository {
      *
      * @return string table name.
      */
-    public function getTable (): string {
+    public function getTable(): string
+    {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
         preg_match_all('#@table (.*)\n#s', $oDocComment, $aTable);
@@ -54,13 +73,14 @@ abstract class AbstractRepository {
      * Get all values matching $sWhere, ordering by $sOrderBy, and limited result to $iLimit.
      *
      *
-     * @param string $sWhere   where clause to filter values.
+     * @param string $sWhere where clause to filter values.
      * @param string $sOrderBy order by field with direction, i.e. 'date DESC'
-     * @param int    $iLimit   maximum amount of data to retrieve.
+     * @param int $iLimit maximum amount of data to retrieve.
      *
      * @return AbstractEntity[] all entities.
      */
-    public function getAll (string $sWhere = '', string $sOrderBy = '', int $iLimit = 0): array {
+    public function getAll(string $sWhere = '', string $sOrderBy = '', int $iLimit = 0): array
+    {
         $sQuery = '';
         $sQuery .= "select * from {$this->getTable()} ";
         if ('' !== $sWhere) {
@@ -74,9 +94,9 @@ abstract class AbstractRepository {
         }
 
         try {
-            $aEntities = Connector::get()->queryMultiple($sQuery, $this->getEntityClass());
+            $aEntities = $this->getConnector()->queryMultiple($sQuery, $this->getEntityClass());
         } catch (QueryException $oException) {
-            Log::get()->error($oException->getMessage());
+            $this->getLogger()->error($oException->getMessage());
             $aEntities = [];
         }
 
@@ -92,10 +112,11 @@ abstract class AbstractRepository {
      * @throws EntityNotFoundException if entity was not found.
      * @throws QueryException error in query.
      */
-    public function get (int $iId) : AbstractEntity {
+    public function get(int $iId): AbstractEntity
+    {
         $sQuery = '';
         $sQuery .= "select * from " . $this->getTable() . " where id = $iId limit 1";
 
-        return Connector::get()->querySingle($sQuery, $this->getEntityClass());
+        return $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
     }
 }

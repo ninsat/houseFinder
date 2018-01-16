@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Controller;
 
@@ -11,6 +12,8 @@ namespace YoannBlot\Framework\Controller;
  * @path("/default-controller/this-path-should-never-be-used/")
  */
 class DefaultController extends AbstractController {
+
+    const NOT_FOUND = 'notFound';
 
     /**
      * @return array

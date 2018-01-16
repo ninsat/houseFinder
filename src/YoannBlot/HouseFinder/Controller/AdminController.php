@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Controller;
 
+use Psr\Log\LoggerInterface;
 use YoannBlot\Framework\Controller\AbstractController;
-use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\HouseFinder\Model\Repository\CityRepository;
+use YoannBlot\HouseFinder\Model\Repository\Helper\CityTrait;
 
 /**
  * Class AdminController.
@@ -14,25 +16,33 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
  *
  * @path("/admin")
  */
-class AdminController extends AbstractController {
+class AdminController extends AbstractController
+{
+
+    use CityTrait;
 
     /**
-     * @return CityRepository current repository.
+     * AdminController constructor.
+     *
+     * @param LoggerInterface $oLogger logger.
+     * @param bool $debug debug mode.
+     * @param CityRepository $oCityRepository city repository.
      */
-    private function getRepository (): CityRepository {
-        return new CityRepository();
+    public function __construct(LoggerInterface $oLogger, $debug, CityRepository $oCityRepository)
+    {
+        parent::__construct($oLogger, $debug);
+        $this->oCityRepository = $oCityRepository;
     }
 
     /**
      * @return array
      *
-     * @throws Redirect404Exception
-     *
      * @path("/city")
      */
-    public function cityRoute () : array {
+    public function cityRoute(): array
+    {
         return [
-            'cities' => $this->getRepository()->getAll()
+            'cities' => $this->getCityRepository()->getAll()
         ];
     }
 

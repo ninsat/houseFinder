@@ -1,20 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\View;
 
+use Psr\Log\LoggerInterface;
 use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
+use YoannBlot\Framework\Service\Logger\LoggerTrait;
 use YoannBlot\Framework\Utils\File\Directory;
-use YoannBlot\Framework\Utils\File\Loader;
-use YoannBlot\Framework\Utils\Log\Log;
-use YoannBlot\Framework\Validator\Boolean;
 
 /**
  * Class View
  *
  * @package YoannBlot\Framework\View
  */
-class View {
+class View
+{
+    use LoggerTrait;
 
     /**
      * View directory name.
@@ -47,20 +49,36 @@ class View {
     private $sCachePath = '';
 
     /**
+     * @var bool debug mode enabled or not.
+     */
+    private $bDebug = false;
+
+    /**
      * View constructor.
      *
+     * @param LoggerInterface $oLogger logger.
      * @param AbstractController $oControllerClass
-     * @param array              $aParameters view parameters
+     * @param array $aParameters view parameters
+     * @param bool $bDebug debug mode.
      */
-    public function __construct (AbstractController $oControllerClass, array $aParameters) {
+    public function __construct(
+        LoggerInterface $oLogger,
+        AbstractController $oControllerClass,
+        array $aParameters,
+        bool $bDebug = false
+    ) {
+        $this->oLogger = $oLogger;
         $this->oControllerClass = $oControllerClass;
         $this->aParameters = $aParameters;
+        $this->bDebug = $bDebug;
     }
+
 
     /**
      * @return string cleaned current class name.
      */
-    private function getCurrentClassName () : string {
+    private function getCurrentClassName(): string
+    {
         $sClassName = get_class($this->oControllerClass);
         $sClassName = substr($sClassName, strrpos($sClassName, '\\') + 1);
         $sClassName = substr($sClassName, 0, strpos($sClassName, 'Controller'));
@@ -71,7 +89,8 @@ class View {
     /**
      * @return string view directory.
      */
-    private function getViewRootDirectory () : string {
+    private function getViewRootDirectory(): string
+    {
         $sDirectory = '';
 
         $sProjectPath = get_class($this->oControllerClass);
@@ -94,7 +113,8 @@ class View {
      *
      * @return string template file
      */
-    private function getTemplate () : string {
+    private function getTemplate(): string
+    {
         $sTemplate = $this->getViewPath() . static::TEMPLATE . static::TEMPLATE_EXT;
         if (!is_file($sTemplate)) {
             $sTemplate = $this->getViewRootDirectory();
@@ -112,7 +132,8 @@ class View {
     /**
      * @return string View directory
      */
-    private function getViewPath () : string {
+    private function getViewPath(): string
+    {
         $sDirectory = $this->getViewRootDirectory();
         $sDirectory .= $this->getCurrentClassName() . DIRECTORY_SEPARATOR;
         $sDirectory .= $this->oControllerClass->getCurrent() . DIRECTORY_SEPARATOR;
@@ -123,7 +144,8 @@ class View {
     /**
      * @return string template cache path.
      */
-    private function getCachePath (): string {
+    private function getCachePath(): string
+    {
         if ('' === $this->sCachePath) {
             $this->sCachePath = '';
             $this->sCachePath .= ROOT_PATH . 'var' . DIRECTORY_SEPARATOR;
@@ -140,19 +162,26 @@ class View {
     }
 
     /**
+     * @return bool true if current mode is debug.
+     */
+    private function isDebug(): bool
+    {
+        return $this->bDebug;
+    }
+
+    /**
      * @return bool true if need cache construction, otherwise false.
      */
-    private function needCache (): bool {
-        $bDebugMode = Boolean::getValue(Loader::get('debug'));
-        $bNeedCache = $bDebugMode || !is_file($this->getCachePath());
-
-        return $bNeedCache;
+    private function needCache(): bool
+    {
+        return $this->isDebug() || !is_file($this->getCachePath());
     }
 
     /**
      * Generate template cache.
      */
-    private function generateCache () {
+    private function generateCache()
+    {
         $sTemplateContent = file_get_contents($this->getTemplate());
 
         preg_match_all('#\[\[([a-z -]+)\]\]#', $sTemplateContent, $aBlocks);
@@ -174,7 +203,8 @@ class View {
     /**
      * Copy all necesary resources.
      */
-    private function copyResources () {
+    private function copyResources()
+    {
         $sResourcesDirectory = $this->getViewRootDirectory();
         $sResourcesDirectory = substr($sResourcesDirectory, 0, strrpos($sResourcesDirectory, 'View'));
         $sResourcesDirectory .= 'Resources' . DIRECTORY_SEPARATOR;
@@ -199,11 +229,12 @@ class View {
      *
      * @throws Redirect404Exception
      */
-    public function display () {
+    public function display()
+    {
         $sTemplateFile = $this->getTemplate();
 
         if (!is_file($sTemplateFile)) {
-            Log::get()->warn("View template '$sTemplateFile' not found. Please ensure file exists.");
+            $this->getLogger()->warning("View template '$sTemplateFile' not found. Please ensure file exists.");
             throw new Redirect404Exception();
         } else {
             if ($this->needCache()) {

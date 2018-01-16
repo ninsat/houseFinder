@@ -1,36 +1,22 @@
 <?php
+declare(strict_types=1);
 
-namespace YoannBlot\Framework\Model\DataBase;
+namespace YoannBlot\Framework\Service\DatabaseConnector;
 
+use YoannBlot\Framework\Model\DataBase\ConfigurationConstants;
+use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
+use YoannBlot\Framework\Service\ConfigurationLoader\LoaderInterface;
 
 /**
- * Class Connector
+ * Class PdoService.
  *
- * @package YoannBlot\Framework\Model\DataBase
- * @author  Yoann Blot
+ * @package YoannBlot\Framework\Service\DatabaseConnector
  */
-class Connector
+class PdoService implements ConnectorInterface
 {
-
-    /**
-     * @var Connector singleton session.
-     */
-    private static $oCurrent = null;
-
-    /**
-     * @return Connector current connector.
-     */
-    public static function get(): Connector
-    {
-        if (null === static::$oCurrent) {
-            static::$oCurrent = new Connector();
-        }
-
-        return static::$oCurrent;
-    }
 
     /**
      * @var \PDO database connection object.
@@ -38,11 +24,40 @@ class Connector
     private $oConnection = null;
 
     /**
-     * Connector constructor.
+     * @var LoaderInterface configuration loader service.
      */
-    private function __construct()
+    private $oLoaderService = null;
+
+    /**
+     * @var DataBaseConfig database configuration.
+     */
+    private $oConfiguration = null;
+
+    /**
+     * PdoService constructor.
+     *
+     * @param LoaderInterface $oLoaderService
+     */
+    public function __construct(LoaderInterface $oLoaderService)
     {
+        $this->oLoaderService = $oLoaderService;
         $this->initConnection();
+    }
+
+    /**
+     * @return LoaderInterface loader service.
+     */
+    private function getLoader(): LoaderInterface
+    {
+        return $this->oLoaderService;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function getConfiguration(): DataBaseConfig
+    {
+        return $this->oConfiguration;
     }
 
     /**
@@ -51,9 +66,22 @@ class Connector
     private function initConnection()
     {
         if (!$this->isConnected()) {
-            $oConfig = ConfigurationLoader::get();
-            $sConnectionSettings = 'mysql:host=' . $oConfig->getHost() . ':' . $oConfig->getPort() . ';dbname=' . $oConfig->getDatabaseName();
-            $this->oConnection = new \PDO($sConnectionSettings, $oConfig->getUsername(), $oConfig->getPassword());
+            $this->getLoader()->load(ConfigurationConstants::PATH);
+            $this->oConfiguration = new DataBaseConfig();
+            $this->getConfiguration()->setHost($this->getLoader()->get(ConfigurationConstants::HOST,
+                ConfigurationConstants::SECTION));
+            $this->getConfiguration()->setPort(intval($this->getLoader()->get(ConfigurationConstants::PORT,
+                ConfigurationConstants::SECTION)));
+            $this->getConfiguration()->setUsername($this->getLoader()->get(ConfigurationConstants::USER,
+                ConfigurationConstants::SECTION));
+            $this->getConfiguration()->setPassword($this->getLoader()->get(ConfigurationConstants::PASSWORD,
+                ConfigurationConstants::SECTION));
+            $this->getConfiguration()->setDatabaseName($this->getLoader()->get(ConfigurationConstants::DATABASE_NAME,
+                ConfigurationConstants::SECTION));
+
+            $sConnectionSettings = 'mysql:host=' . $this->getConfiguration()->getHost() . ':' . $this->getConfiguration()->getPort() . ';dbname=' . $this->getConfiguration()->getDatabaseName();
+            $this->oConnection = new \PDO($sConnectionSettings, $this->getConfiguration()->getUsername(),
+                $this->getConfiguration()->getPassword());
             $this->oConnection->exec("SET CHARACTER SET utf8");
         }
     }
@@ -93,11 +121,7 @@ class Connector
     }
 
     /**
-     * Execute a query and return default array.
-     *
-     * @param string $sQuery query to execute
-     * @return array data fetched.
-     * @throws QueryException query exception.
+     * @inheritdoc
      */
     public function fetchAll(string $sQuery): array
     {
@@ -111,10 +135,7 @@ class Connector
     }
 
     /**
-     * Execute a simple query.
-     *
-     * @param string $sQuery query to execute
-     * @return bool true if success, otherwise false.
+     * @inheritdoc
      */
     public function execute(string $sQuery): bool
     {
@@ -123,14 +144,7 @@ class Connector
     }
 
     /**
-     * Query a single object.
-     *
-     * @param string $sQuery query to execute
-     * @param string $sClassName entity class name
-     *
-     * @return AbstractEntity matched entity if found, otherwise null.
-     * @throws EntityNotFoundException if entity was not found.
-     * @throws QueryException query exception.
+     * @inheritdoc
      */
     public function querySingle(string $sQuery, string $sClassName): AbstractEntity
     {
@@ -149,13 +163,7 @@ class Connector
     }
 
     /**
-     * Query multiple objects.
-     *
-     * @param string $sQuery query to execute.
-     * @param string $sClassName entity class name
-     *
-     * @return AbstractEntity[] matched entities as array.
-     * @throws QueryException query exception.
+     * @inheritdoc
      */
     public function queryMultiple(string $sQuery, string $sClassName): array
     {

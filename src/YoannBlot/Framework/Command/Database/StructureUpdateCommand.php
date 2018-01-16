@@ -1,14 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Command\Database;
 
 use YoannBlot\Framework\Command\AbstractCommand;
-use YoannBlot\Framework\Model\DataBase\ConfigurationLoader;
-use YoannBlot\Framework\Model\DataBase\Connector;
 use YoannBlot\Framework\Model\DataBase\TableColumn;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
-use YoannBlot\Framework\Utils\Log\Log;
+use YoannBlot\Framework\Service\DatabaseConnector\ConnectorInterface;
+use YoannBlot\Framework\Service\DatabaseConnector\ConnectorTrait;
+use YoannBlot\Framework\Service\Logger\LoggerService;
 
 /**
  * Class Database\StructureUpdateCommand.
@@ -17,6 +18,21 @@ use YoannBlot\Framework\Utils\Log\Log;
  */
 class StructureUpdateCommand extends AbstractCommand
 {
+
+    use ConnectorTrait;
+
+    /**
+     * AbstractCommand constructor.
+     *
+     * @param LoggerService $oLogger logger.
+     * @param ConnectorInterface $oConnectorService connector service.
+     */
+    public function __construct(LoggerService $oLogger, ConnectorInterface $oConnectorService)
+    {
+        parent::__construct($oLogger);
+        $this->oConnector = $oConnectorService;
+    }
+
     /**
      * @inheritdoc
      */
@@ -24,9 +40,9 @@ class StructureUpdateCommand extends AbstractCommand
     {
         $bSuccess = true;
         foreach ($this->getAllRepositories() as $oRepository) {
-            Log::get()->info("Repository " . get_class($oRepository) . " => table '{$oRepository->getTable()}'.");
+            $this->getLogger()->info("Repository " . get_class($oRepository) . " => table '{$oRepository->getTable()}'.");
             if (!$this->tableExists($oRepository->getTable()) && !$this->createTable($oRepository)) {
-                Log::get()->error("Error creating table '{$oRepository->getTable()}'.");
+                $this->getLogger()->error("Error creating table '{$oRepository->getTable()}'.");
                 $bSuccess = false;
             }
         }
@@ -68,7 +84,7 @@ class StructureUpdateCommand extends AbstractCommand
      */
     private function tableExists(string $sTableName): bool
     {
-        $sDatabaseName = ConfigurationLoader::get()->getDatabaseName();
+        $sDatabaseName = $this->getConnector()->getConfiguration()->getDatabaseName();
 
         $sQuery = '';
         $sQuery .= 'SELECT table_name ';
@@ -78,9 +94,9 @@ class StructureUpdateCommand extends AbstractCommand
         $sQuery .= "LIMIT 1 ";
 
         try {
-            $bExists = count(Connector::get()->fetchAll($sQuery)) > 0;
+            $bExists = count($this->getConnector()->fetchAll($sQuery)) > 0;
         } catch (QueryException $oException) {
-            Log::get()->error($oException->getMessage());
+            $this->getLogger()->error($oException->getMessage());
             $bExists = false;
         }
 
@@ -95,7 +111,7 @@ class StructureUpdateCommand extends AbstractCommand
      */
     private function createTable(AbstractRepository $oRepository): bool
     {
-        $sDatabaseName = ConfigurationLoader::get()->getDatabaseName();
+        $sDatabaseName = $this->getConnector()->getConfiguration()->getDatabaseName();
 
         $sQuery = '';
         $sQuery .= "CREATE TABLE $sDatabaseName.{$oRepository->getTable()} ( ";
@@ -114,7 +130,7 @@ class StructureUpdateCommand extends AbstractCommand
         $sQuery .= "DEFAULT CHARACTER SET = utf8;";
 
 
-        return Connector::get()->execute($sQuery);
+        return $this->getConnector()->execute($sQuery);
     }
 
     /**

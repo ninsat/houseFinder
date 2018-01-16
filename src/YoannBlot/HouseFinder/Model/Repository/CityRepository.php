@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Repository;
 
@@ -14,14 +15,16 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  *
  * @table   houses_city
  */
-class CityRepository extends AbstractRepository {
+class CityRepository extends AbstractRepository
+{
 
     /**
      * @inheritdoc
      *
      * @return City matched city.
      */
-    public function get (int $iId): AbstractEntity {
+    public function get(int $iId): AbstractEntity
+    {
         return parent::get($iId);
     }
 
@@ -30,7 +33,8 @@ class CityRepository extends AbstractRepository {
      *
      * @return City[] matched cities.
      */
-    public function getAll (string $sWhere = 'WHERE enabled = 1', string $sOrderBy = 'name asc', int $iLimit = 0): array {
+    public function getAll(string $sWhere = 'WHERE enabled = 1', string $sOrderBy = 'name asc', int $iLimit = 0): array
+    {
         return parent::getAll($sWhere, $sOrderBy, $iLimit);
     }
 

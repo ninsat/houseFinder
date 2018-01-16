@@ -1,9 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Controller;
 
+use Psr\Log\LoggerInterface;
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
-use YoannBlot\Framework\Utils\Log\Log;
+use YoannBlot\Framework\Service\Logger\LoggerTrait;
+use YoannBlot\Framework\Validator\Boolean;
 use YoannBlot\Framework\View\View;
 
 /**
@@ -12,7 +15,10 @@ use YoannBlot\Framework\View\View;
  * @package YoannBlot\Framework\Controller
  * @author  Yoann Blot
  */
-abstract class AbstractController {
+abstract class AbstractController
+{
+
+    use LoggerTrait;
 
     /**
      * Default page name.
@@ -23,17 +29,36 @@ abstract class AbstractController {
      * @var string current page
      */
     private $sCurrentRoute = self::DEFAULT_PAGE;
+
     /**
      * @var array route parameters.
      */
     private $aRouteParameters = [];
 
     /**
+     * @var bool debug mode.
+     */
+    private $bDebug = false;
+
+    /**
+     * AbstractController constructor.
+     *
+     * @param LoggerInterface $oLogger logger.
+     * @param bool $debug debug mode.
+     */
+    public function __construct(LoggerInterface $oLogger, $debug)
+    {
+        $this->oLogger = $oLogger;
+        $this->bDebug = Boolean::getValue($debug);
+    }
+
+    /**
      * Get the controller pattern.
      *
      * @return string controller pattern.
      */
-    public function getControllerPattern (): string {
+    public function getControllerPattern(): string
+    {
         $oReflectionClass = new \ReflectionClass($this);
         $oDocComment = $oReflectionClass->getDocComment();
         preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
@@ -41,7 +66,7 @@ abstract class AbstractController {
             $sControllerPattern = $aPathAnnotations[1][0];
         } else {
             $sControllerPattern = '';
-            Log::get()->error('You must add an annotation @path to your Controller ' . get_class($this));
+            $this->getLogger()->error('You must add an annotation @path to your Controller ' . get_class($this));
         }
 
         return $sControllerPattern;
@@ -54,7 +79,8 @@ abstract class AbstractController {
      *
      * @return bool true if given path is matching current controller.
      */
-    public function matchPath (string $sPath): bool {
+    public function matchPath(string $sPath): bool
+    {
         $sControllerPath = $this->getControllerPattern();
 
         if ('' !== $sControllerPath) {
@@ -71,7 +97,8 @@ abstract class AbstractController {
      *
      * @throws Redirect404Exception
      */
-    public function autoSelectPage () {
+    public function autoSelectPage()
+    {
         $oReflectionClass = new \ReflectionClass($this);
         $bFound = false;
         foreach ($oReflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $oMethod) {
@@ -108,7 +135,8 @@ abstract class AbstractController {
     /**
      * @return string current page/route
      */
-    public function getCurrent (): string {
+    public function getCurrent(): string
+    {
         return $this->sCurrentRoute;
     }
 
@@ -118,7 +146,8 @@ abstract class AbstractController {
      * @param string $sCurrentRoute current route.
      * @param array $aParameters parameters to route.
      */
-    public function setCurrentRoute (string $sCurrentRoute, array $aParameters = []) {
+    public function setCurrentRoute(string $sCurrentRoute, array $aParameters = [])
+    {
         if ($this->isRouteValid($sCurrentRoute)) {
             $this->sCurrentRoute = $sCurrentRoute;
             $this->aRouteParameters = $aParameters;
@@ -132,18 +161,18 @@ abstract class AbstractController {
      *
      * @return bool true if given page is valid, otherwise false.
      */
-    private function isRouteValid (string $sPageName): bool {
+    private function isRouteValid(string $sPageName): bool
+    {
         // check if method exists $sPageName.'Route'
         $sMethodName = $sPageName . 'Route';
-        $bValid = method_exists($this, $sMethodName);
-
-        return $bValid;
+        return method_exists($this, $sMethodName);
     }
 
     /**
      * @return array data to send to view page.
      */
-    private function getRouteData (): array {
+    private function getRouteData(): array
+    {
         $sPage = $this->getCurrent() . 'Route';
 
         $oMethod = new \ReflectionMethod($this, $sPage);
@@ -153,11 +182,16 @@ abstract class AbstractController {
 
     /**
      * Display current page.
+     *
+     * @return string page content to display.
+     *
+     * @throws Redirect404Exception 404 exception.
      */
-    public function displayPage () {
+    public function displayPage()
+    {
         ob_start();
 
-        $oView = new View($this, $this->getRouteData());
+        $oView = new View($this->getLogger(), $this, $this->getRouteData(), $this->bDebug);
         $oView->display();
 
         return ob_get_clean();

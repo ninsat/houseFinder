@@ -1,0 +1,21 @@
+{
+  "name": "yoannblot/housefinder",
+  "description": "Tools for finding a house",
+  "homepage": "https://github.com/yoannblot/houseFinder",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Yoann Blot",
+      "homepage": "http://www.yoannblot.com/"
+    }
+  ],
+  "require": {
+    "php": ">=7.1",
+    "psr/log": "1.0.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "src/"
+    }
+  }
+}

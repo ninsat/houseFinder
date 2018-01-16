@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\Entity;
 
@@ -33,7 +34,7 @@ abstract class AbstractEntity
      */
     public function getId(): int
     {
-        return $this->id;
+        return intval($this->id);
     }
 
     /**
@@ -51,6 +52,7 @@ abstract class AbstractEntity
     {
         if (count($this->aLinks) > 0) {
             foreach ($this->aLinks as $sLinkName => $iLinkValue) {
+                // TODO link Repository with entity
                 $sRepositoryName = "YoannBlot\HouseFinder\Model\Repository\\" . ucfirst($sLinkName) . 'Repository';
                 /** @var AbstractRepository $oRepository */
                 $oRepository = new $sRepositoryName();

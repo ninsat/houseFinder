@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Entity\Common;
 
@@ -11,6 +12,8 @@ trait PostalCode {
 
     /**
      * @var string postal code.
+     * @length=5
+     * @nullable=false
      */
     private $postal_code = '';
 

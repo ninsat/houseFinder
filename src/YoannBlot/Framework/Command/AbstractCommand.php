@@ -1,6 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Command;
+
+use YoannBlot\Framework\Service\Logger\LoggerService;
+use YoannBlot\Framework\Service\Logger\LoggerTrait;
 
 /**
  * Class AbstractCommand.
@@ -9,8 +13,20 @@ namespace YoannBlot\Framework\Command;
  */
 abstract class AbstractCommand
 {
+    use LoggerTrait;
+
     const DIRECTORY_SEPARATOR = ':';
     const FILE_SEPARATOR = '-';
+
+    /**
+     * AbstractCommand constructor.
+     *
+     * @param LoggerService $oLogger logger.
+     */
+    public function __construct(LoggerService $oLogger)
+    {
+        $this->oLogger = $oLogger;
+    }
 
     /**
      * Get the current command name.

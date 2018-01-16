@@ -17,7 +17,7 @@ class LogTest extends TestCase {
      * Test logger initialization.
      */
     public function testInitialization () {
-        static::assertNotNull(Log::get());
+        static::assertNotNull(LoggerService::get());
     }
 
     /**
@@ -25,18 +25,18 @@ class LogTest extends TestCase {
      */
     public function testSetLevel () {
         // default level
-        static::assertEquals(Log::DEFAULT_MODE, Log::get()->getLevel());
+        static::assertEquals(LoggerService::DEFAULT_MODE, LoggerService::get()->getLevel());
 
         // change level to existing
-        Log::get()->setLevel('DEBUG');
-        static::assertEquals(LogValues::DEBUG, Log::get()->getLevel());
+        LoggerService::get()->setLevel('DEBUG');
+        static::assertEquals(LogValues::DEBUG, LoggerService::get()->getLevel());
         // lower
-        Log::get()->setLevel('info');
-        static::assertEquals(LogValues::INFO, Log::get()->getLevel());
+        LoggerService::get()->setLevel('info');
+        static::assertEquals(LogValues::INFO, LoggerService::get()->getLevel());
 
         // change level to non existing
-        Log::get()->setLevel('FAKE');
-        static::assertNotEquals(0, Log::get()->getLevel());
+        LoggerService::get()->setLevel('FAKE');
+        static::assertNotEquals(0, LoggerService::get()->getLevel());
     }
 
     /**
@@ -44,7 +44,7 @@ class LogTest extends TestCase {
      */
     public function testWriteMessage () {
         $sMessage = 'test write';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
 
         $oLogger->setLevel('ERROR');
         $oLogger->error($sMessage);
@@ -61,7 +61,7 @@ class LogTest extends TestCase {
 
     public function testDebugMessage () {
         $sMessage = 'test debug';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
 
         $oLogger->setLevel('DEBUG');
         $oLogger->debug($sMessage);
@@ -77,7 +77,7 @@ class LogTest extends TestCase {
 
     public function testInfoMessage () {
         $sMessage = 'test info';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
 
         $oLogger->setLevel('INFO');
         $oLogger->info($sMessage);
@@ -93,7 +93,7 @@ class LogTest extends TestCase {
 
     public function testWarningMessage () {
         $sMessage = 'test warn';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
 
         $oLogger->setLevel('WARN');
         $oLogger->warn($sMessage);
@@ -109,7 +109,7 @@ class LogTest extends TestCase {
 
     public function testErrorMessage () {
         $sMessage = 'test error';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
 
         $oLogger->setLevel('ERROR');
         $oLogger->error($sMessage);
@@ -128,7 +128,7 @@ class LogTest extends TestCase {
      */
     public function testAllowedMessages () {
         $sMessage = 'test write';
-        $oLogger = Log::get();
+        $oLogger = LoggerService::get();
         $oLogger->setLevel('DEBUG');
 
         $oLogger->debug($sMessage);

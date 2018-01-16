@@ -13,8 +13,8 @@ class LogValuesTest extends TestCase {
         static::assertEquals(LogValues::INFO, LogValues::get('info'));
         static::assertEquals(LogValues::INFO, LogValues::get('INFO'));
 
-        static::assertEquals(LogValues::WARN, LogValues::get('WARN'));
-        static::assertEquals(LogValues::WARN, LogValues::get('warn'));
+        static::assertEquals(LogValues::WARNING, LogValues::get('WARN'));
+        static::assertEquals(LogValues::WARNING, LogValues::get('warn'));
 
         static::assertEquals(LogValues::ERROR, LogValues::get('error'));
         static::assertEquals(LogValues::ERROR, LogValues::get('ERROR'));
