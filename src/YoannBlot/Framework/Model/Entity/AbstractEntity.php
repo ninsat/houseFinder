@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\Entity;
 
+use YoannBlot\Framework\Model\Entity\Common\IdPrimaryKey;
 use YoannBlot\Framework\Model\Exception\DataBaseException;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
 
@@ -18,32 +19,12 @@ abstract class AbstractEntity
 
     const DEFAULT_ID = -1;
 
-    /**
-     * @var int id
-     * @nullable=false
-     */
-    protected $id = self::DEFAULT_ID;
+    use IdPrimaryKey;
 
     /**
      * @var array waiting links.
      */
     private $aLinks = [];
-
-    /**
-     * @return int
-     */
-    public function getId(): int
-    {
-        return intval($this->id);
-    }
-
-    /**
-     * @param int $iId
-     */
-    public function setId(int $iId): void
-    {
-        $this->id = $iId;
-    }
 
     /**
      * Add necessary links.

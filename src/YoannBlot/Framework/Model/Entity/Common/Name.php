@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\Entity\Common;
 
+use YoannBlot\Framework\Model\DataBase\Annotation\Length;
+use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
+
 /**
  * Trait Name.
  *
@@ -13,8 +16,8 @@ trait Name
 
     /**
      * @var string name.
-     * @length=50
-     * @nullable=false
+     * @Length(50)
+     * @Nullable(false)
      */
     private $name = '';
 

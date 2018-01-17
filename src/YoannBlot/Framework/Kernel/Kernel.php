@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Kernel;
 
+use Doctrine\Common\Annotations\AnnotationRegistry;
 use YoannBlot\Framework\Command\AbstractCommand;
 use YoannBlot\Framework\Command\Exception\CommandNotFoundException;
 use YoannBlot\Framework\Controller\AbstractController;
@@ -33,6 +34,7 @@ class Kernel
         if ($bAutoDisplay) {
             $this->display();
         }
+        $this->autoloadAnnotations();
     }
 
     /**
@@ -55,7 +57,8 @@ class Kernel
             $oController = $this->selectController();
             $oController->autoSelectPage();
             $sOutput = $oController->displayPage();
-        } catch (Redirect404Exception $oException) {
+            // TODO add access denied exception
+        } catch (Redirect404Exception | \Exception $oException) {
             $oController = new DefaultController($this->getContainer()->getLogger(), false);
             $oController->setCurrentRoute(DefaultController::NOT_FOUND);
             try {
@@ -122,6 +125,30 @@ class Kernel
             }
         } catch (CommandNotFoundException $oException) {
             echo "Cannot run command : " . $oException->getMessage();
+        }
+    }
+
+    /**
+     * Autoload all annotations files.
+     */
+    private function autoloadAnnotations(): void
+    {
+        $aNamespaces = [];
+        $aAnnotationClasses = glob(SRC_PATH . 'YoannBlot/*/Model/DataBase/Annotation/*.php');
+        foreach ($aAnnotationClasses as $sAnnotationClass) {
+            $sAnnotationClass = str_replace('/', '\\', $sAnnotationClass);
+            $sNamespace = str_replace(SRC_PATH, '', $sAnnotationClass);
+            $sNamespace = substr($sNamespace, 0, strrpos($sNamespace, '\\'));
+            if (!in_array($sNamespace, $aNamespaces)) {
+                $this->getContainer()->getLogger()->debug("Add namespace '$sNamespace' to annotation register.");
+                AnnotationRegistry::registerAutoloadNamespace($sNamespace, SRC_PATH);
+                $aNamespaces[] = $sNamespace;
+            }
+            $sAnnotationClass = $sNamespace . substr($sAnnotationClass, strrpos($sAnnotationClass, '\\'));
+            $sAnnotationClass = substr($sAnnotationClass, 0, strrpos($sAnnotationClass, '.'));
+            if (!AnnotationRegistry::loadAnnotationClass($sAnnotationClass)) {
+                $this->getContainer()->getLogger()->error("Failed autoloading Annotation class " . $sAnnotationClass);
+            }
         }
     }
 }

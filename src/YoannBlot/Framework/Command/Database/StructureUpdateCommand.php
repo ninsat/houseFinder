@@ -3,7 +3,11 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Command\Database;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use YoannBlot\Framework\Command\AbstractCommand;
+use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
+use YoannBlot\Framework\Model\DataBase\Annotation\Length;
+use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
 use YoannBlot\Framework\Model\DataBase\TableColumn;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
@@ -22,15 +26,22 @@ class StructureUpdateCommand extends AbstractCommand
     use ConnectorTrait;
 
     /**
+     * @var AbstractRepository[] repositories.
+     */
+    private $aRepositories = [];
+
+    /**
      * AbstractCommand constructor.
      *
      * @param LoggerService $oLogger logger.
      * @param ConnectorInterface $oConnectorService connector service.
+     * @param AbstractRepository[] $repositories all repositories.
      */
-    public function __construct(LoggerService $oLogger, ConnectorInterface $oConnectorService)
+    public function __construct(LoggerService $oLogger, ConnectorInterface $oConnectorService, array $repositories)
     {
         parent::__construct($oLogger);
         $this->oConnector = $oConnectorService;
+        $this->aRepositories = $repositories;
     }
 
     /**
@@ -57,23 +68,7 @@ class StructureUpdateCommand extends AbstractCommand
      */
     private function getAllRepositories(): array
     {
-        $aRepositories = [];
-
-        $aFileRepositories = glob(SRC_PATH . 'YoannBlot/*/Model/Repository/*.php');
-        foreach ($aFileRepositories as $sRepositoryPath) {
-            if (false === strpos($sRepositoryPath, 'Abstract')) {
-                $sRepositoryPath = str_replace([SRC_PATH, '.php'], '', $sRepositoryPath);
-                $sRepositoryPath = str_replace('/', '\\', $sRepositoryPath);
-                $oReflection = new \ReflectionClass($sRepositoryPath);
-
-                $oRepository = $oReflection->newInstance();
-                if ($oRepository instanceof AbstractRepository) {
-                    $aRepositories[] = $oRepository;
-                }
-            }
-        }
-
-        return $aRepositories;
+        return $this->aRepositories;
     }
 
     /**
@@ -129,8 +124,15 @@ class StructureUpdateCommand extends AbstractCommand
         $sQuery .= "ENGINE = InnoDB ";
         $sQuery .= "DEFAULT CHARACTER SET = utf8;";
 
+        $bSuccess = true;
+        try {
+            $this->getConnector()->execute($sQuery);
+        } catch (QueryException $oException) {
+            $this->getLogger()->error($oException->getMessage());
+            $bSuccess = false;
+        }
 
-        return $this->getConnector()->execute($sQuery);
+        return $bSuccess;
     }
 
     /**
@@ -161,17 +163,18 @@ class StructureUpdateCommand extends AbstractCommand
      */
     private function getColumn(\ReflectionProperty $oProperty): TableColumn
     {
+        $oAnnotationReader = new AnnotationReader();
+
         $sVariableType = substr($oProperty->getDocComment(),
             strpos($oProperty->getDocComment(), '@var ') + strlen('@var '));
         $sVariableType = substr($sVariableType, 0, strpos($sVariableType, ' '));
 
         // get length
         $iLength = null;
-        if (false !== strpos($oProperty->getDocComment(), TableColumn::LENGTH)) {
-            $iLength = substr($oProperty->getDocComment(),
-                strpos($oProperty->getDocComment(), TableColumn::LENGTH) + strlen(TableColumn::LENGTH));
-            $iLength = substr($iLength, 0, strpos($iLength, ' '));
-            $iLength = intval(trim($iLength));
+        /** @var Length $oLengthAnnotation */
+        $oLengthAnnotation = $oAnnotationReader->getPropertyAnnotation($oProperty, Length::class);
+        if (null !== $oLengthAnnotation) {
+            $iLength = $oLengthAnnotation->getLength();
         }
 
         // get SQL type
@@ -186,6 +189,9 @@ class StructureUpdateCommand extends AbstractCommand
                 }
                 $sSqlType = "INT($iLength) UNSIGNED";
                 break;
+            case 'float':
+                $sSqlType = "DOUBLE";
+                break;
             // TODO other types
             default:
                 if (null === $iLength) {
@@ -196,16 +202,17 @@ class StructureUpdateCommand extends AbstractCommand
         }
 
         // check if nullable
-        $bNullable = true;
-        if (false !== strpos($oProperty->getDocComment(), TableColumn::NULLABLE)) {
-            $bNullable = substr($oProperty->getDocComment(),
-                strpos($oProperty->getDocComment(), TableColumn::NULLABLE) + strlen(TableColumn::NULLABLE));
-            $bNullable = substr($bNullable, 0, strpos($bNullable, ' '));
-            $bNullable = ('true' === trim($bNullable));
-        }
+        /** @var Nullable $oNullableAnnotation */
+        $oNullableAnnotation = $oAnnotationReader->getPropertyAnnotation($oProperty, Nullable::class);
+        $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
+
+        $bAutoIncrement = null !== $oAnnotationReader->getPropertyAnnotation($oProperty, AutoIncrement::class);
 
         // TODO default value
+        $sDefaultValue = null;
 
-        return new TableColumn($oProperty->getName(), $sSqlType, $bNullable);
+        $oColumn = new TableColumn($oProperty->getName(), $sSqlType, $bNullable, $sDefaultValue, $bAutoIncrement);
+
+        return $oColumn;
     }
 }

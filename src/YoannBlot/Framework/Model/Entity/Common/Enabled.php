@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\Entity\Common;
 
+use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
 use YoannBlot\Framework\Validator\Boolean;
 
 /**
@@ -14,6 +15,7 @@ trait Enabled {
 
     /**
      * @var bool is city enabled.
+     * @Nullable(false)
      */
     private $enabled = true;
 

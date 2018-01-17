@@ -140,7 +140,14 @@ class PdoService implements ConnectorInterface
     public function execute(string $sQuery): bool
     {
         $this->initConnection();
-        return false !== $this->getConnection()->exec($sQuery);
+        $bSuccess = false !== $this->getConnection()->exec($sQuery);
+
+        if (!$bSuccess) {
+            throw new QueryException($sQuery, $this->getConnection()->errorInfo()[2],
+                intval($this->getConnection()->errorCode()));
+        }
+
+        return $bSuccess;
     }
 
     /**

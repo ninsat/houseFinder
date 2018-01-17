@@ -111,6 +111,8 @@ class Container
                     $oService = $this->getService($oConstructorParameter->getType()->getName());
                     if (null !== $oService) {
                         $aServiceParameters [] = $oService;
+                    } elseif ('repositories' === $oConstructorParameter->getName()) {
+                        $aServiceParameters [] = $this->getAllRepositories();
                     }
                 } elseif (array_key_exists($oConstructorParameter->getName(), $this->aParameters)) {
                     $aServiceParameters [] = $this->aParameters[$oConstructorParameter->getName()];
@@ -133,6 +135,20 @@ class Container
         $oService = $this->getService($sRepositoryName);
 
         return $oService;
+    }
+
+    /**
+     * @return AbstractRepository[] all repositories.
+     */
+    private function getAllRepositories(): array
+    {
+        $aRepositories = [];
+        foreach ($this->aServices as $sServiceName => $oService) {
+            if ($oService instanceof AbstractRepository) {
+                $aRepositories[] = $oService;
+            }
+        }
+        return $aRepositories;
     }
 
     /**

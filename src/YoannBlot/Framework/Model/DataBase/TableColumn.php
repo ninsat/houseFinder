@@ -1,9 +1,7 @@
 <?php
 declare(strict_types=1);
 
-
 namespace YoannBlot\Framework\Model\DataBase;
-
 
 /**
  * Class TableColumn.
@@ -14,6 +12,7 @@ class TableColumn
 {
     const NULLABLE = '@nullable=';
     const LENGTH = '@length=';
+    const AUTO_INCREMENT = '@AutoIncrement';
 
     /**
      * @var string column name.
@@ -31,6 +30,11 @@ class TableColumn
     private $bIsNullable = true;
 
     /**
+     * @var bool true if column is auto increment, otherwise false.
+     */
+    private $bAutoIncrement = false;
+
+    /**
      * @var string default column value.
      */
     private $sDefaultValue = null;
@@ -42,13 +46,20 @@ class TableColumn
      * @param string $sType column type.
      * @param bool $bIsNullable is nullable.
      * @param string $sDefaultValue default value.
+     * @param bool $bAutoIncrement auto increment.
      */
-    public function __construct(string $sName, string $sType, bool $bIsNullable = false, string $sDefaultValue = null)
-    {
+    public function __construct(
+        string $sName,
+        string $sType,
+        bool $bIsNullable = false,
+        string $sDefaultValue = null,
+        bool $bAutoIncrement = false
+    ) {
         $this->sName = $sName;
         $this->sType = strtoupper($sType);
         $this->bIsNullable = $bIsNullable;
         $this->sDefaultValue = $sDefaultValue;
+        $this->bAutoIncrement = $bAutoIncrement;
     }
 
 
@@ -90,6 +101,14 @@ class TableColumn
     public function hasDefaultValue(): bool
     {
         return null !== $this->sDefaultValue;
+    }
+
+    /**
+     * @return bool true if auto increment is enabled.
+     */
+    public function isAutoIncrement(): bool
+    {
+        return $this->bAutoIncrement;
     }
 
 

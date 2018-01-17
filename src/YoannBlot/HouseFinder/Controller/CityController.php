@@ -72,9 +72,10 @@ class CityController extends AbstractController
     {
         $oCity = $this->getCityRepository()->get($iCityId);
         $oLastHouses = $this->getHouseRepository()->getLast($oCity);
+        $aCitites = $this->getCityRepository()->getAll();
 
         return [
-            'cities' => $this->getCityRepository()->getAll(),
+            'cities' => $aCitites,
             'city' => $oCity,
             'houses' => $oLastHouses
         ];

@@ -39,7 +39,9 @@ interface ConnectorInterface
      * Execute a simple query.
      *
      * @param string $sQuery query to execute
+     *
      * @return bool true if success, otherwise false.
+     * @throws QueryException query exception.
      */
     public function execute(string $sQuery): bool;
 
@@ -65,6 +67,4 @@ interface ConnectorInterface
      * @throws QueryException query exception.
      */
     public function queryMultiple(string $sQuery, string $sClassName): array;
-
-
 }
