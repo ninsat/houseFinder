@@ -5,6 +5,7 @@ namespace YoannBlot\Framework\Model\Entity\Common;
 
 use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
 use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
+use YoannBlot\Framework\Model\DataBase\Annotation\PrimaryKey;
 
 /**
  * Trait IdPrimaryKey.
@@ -18,6 +19,7 @@ trait IdPrimaryKey
      * @var int id
      * @Nullable(false)
      * @AutoIncrement()
+     * @PrimaryKey()
      */
     protected $id = self::DEFAULT_ID;
 

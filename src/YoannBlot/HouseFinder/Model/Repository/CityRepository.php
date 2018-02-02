@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Repository;
 
-use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
 use YoannBlot\HouseFinder\Model\Entity\City;
 
@@ -17,16 +16,6 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  */
 class CityRepository extends AbstractRepository
 {
-
-    /**
-     * @inheritdoc
-     *
-     * @return City matched city.
-     */
-    public function get(int $iId): AbstractEntity
-    {
-        return parent::get($iId);
-    }
 
     /**
      * @inheritDoc

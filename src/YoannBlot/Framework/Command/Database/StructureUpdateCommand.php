@@ -3,11 +3,14 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Command\Database;
 
+use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use YoannBlot\Framework\Command\AbstractCommand;
 use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
 use YoannBlot\Framework\Model\DataBase\Annotation\Length;
+use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
+use YoannBlot\Framework\Model\DataBase\Annotation\PrimaryKey;
 use YoannBlot\Framework\Model\DataBase\TableColumn;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
@@ -31,6 +34,11 @@ class StructureUpdateCommand extends AbstractCommand
     private $aRepositories = [];
 
     /**
+     * @var AnnotationReader annotation reader.
+     */
+    private $oAnnotationReader = null;
+
+    /**
      * AbstractCommand constructor.
      *
      * @param LoggerService $oLogger logger.
@@ -42,6 +50,31 @@ class StructureUpdateCommand extends AbstractCommand
         parent::__construct($oLogger);
         $this->oConnector = $oConnectorService;
         $this->aRepositories = $repositories;
+    }
+
+    /**
+     * Get all repositories.
+     *
+     * @return AbstractRepository[] project repositories.
+     */
+    private function getAllRepositories(): array
+    {
+        return $this->aRepositories;
+    }
+
+    /**
+     * @return AnnotationReader annotation reader.
+     */
+    private function getAnnotationReader(): AnnotationReader
+    {
+        if (null === $this->oAnnotationReader) {
+            try {
+                $this->oAnnotationReader = new AnnotationReader();
+            } catch (AnnotationException $oException) {
+                $this->getLogger()->error("Cannot create annotation reader...");
+            }
+        }
+        return $this->oAnnotationReader;
     }
 
     /**
@@ -58,17 +91,9 @@ class StructureUpdateCommand extends AbstractCommand
             }
         }
 
-        return $bSuccess;
-    }
+        $this->createManyToManyTables();
 
-    /**
-     * Get all repositories.
-     *
-     * @return AbstractRepository[] project repositories.
-     */
-    private function getAllRepositories(): array
-    {
-        return $this->aRepositories;
+        return $bSuccess;
     }
 
     /**
@@ -99,6 +124,56 @@ class StructureUpdateCommand extends AbstractCommand
     }
 
     /**
+     * Create many to many tables.
+     */
+    private function createManyToManyTables(): void
+    {
+        foreach ($this->getAllRepositories() as $oRepository) {
+            try {
+                $oReflection = new \ReflectionClass($oRepository->getEntityClass());
+                foreach ($oReflection->getProperties() as $oProperty) {
+                    if ($this->isManyToMany($oProperty)) {
+                        /** @var ManyToMany $oAnnotation */
+                        $oAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
+                            ManyToMany::class);
+                        if (!$this->tableExists($oAnnotation->table)) {
+                            $this->createManyToManyTable($oRepository, $this->getForeignRepository($oProperty),
+                                $oAnnotation);
+                        }
+                    }
+                }
+            } catch (\ReflectionException $oException) {
+                $this->getLogger()->error("Cannot create entity from class '{$oRepository->getEntityClass()}' : " . $oException->getMessage());
+            }
+        }
+    }
+
+    /**
+     * Get the matched Foreign repository of a ManyToMany column.
+     *
+     * @param \ReflectionProperty $oProperty property where find repository.
+     *
+     * @return AbstractRepository matched repository.
+     */
+    private function getForeignRepository(\ReflectionProperty $oProperty): AbstractRepository
+    {
+        $oFoundRepository = null;
+        $sEntityType = $this->getVariableType($oProperty);
+        $iBracketPosition = strpos($sEntityType, '[]');
+        if (false !== $iBracketPosition) {
+            $sEntityType = substr($sEntityType, 0, $iBracketPosition);
+            foreach ($this->getAllRepositories() as $oRepository) {
+                if (false !== strpos($sEntityType, $oRepository->getEntityClass())) {
+                    $oFoundRepository = $oRepository;
+                    break;
+                }
+            }
+        }
+
+        return $oFoundRepository;
+    }
+
+    /**
      * Get the table SQL structure.
      *
      * @param AbstractRepository $oRepository repository.
@@ -111,15 +186,25 @@ class StructureUpdateCommand extends AbstractCommand
         $sQuery = '';
         $sQuery .= "CREATE TABLE $sDatabaseName.{$oRepository->getTable()} ( ";
         $aColumnsQuery = [];
+        $aIdFields = [];
         foreach ($this->getColumns($oRepository) as $oColumn) {
+            if ($oColumn->isPrimaryKey()) {
+                $aIdFields[] = $oColumn->getName();
+            }
             $sColumnQuery = " {$oColumn->getName()} {$oColumn->getType()} ";
             $sColumnQuery .= (!$oColumn->isNullable() ? 'NOT ' : '') . 'NULL';
             if ($oColumn->hasDefaultValue()) {
                 $sColumnQuery .= ' DEFAULT ' . $oColumn->getDefaultValue();
             }
+            if ($oColumn->isAutoIncrement()) {
+                $sColumnQuery .= ' AUTO_INCREMENT';
+            }
             $aColumnsQuery[] = $sColumnQuery;
         }
         $sQuery .= implode(',', $aColumnsQuery);
+        if (count($aIdFields) > 0) {
+            $sQuery .= "  ,PRIMARY KEY (" . implode(',', $aIdFields) . ') ';
+        }
         $sQuery .= " ) ";
         $sQuery .= "ENGINE = InnoDB ";
         $sQuery .= "DEFAULT CHARACTER SET = utf8;";
@@ -146,39 +231,64 @@ class StructureUpdateCommand extends AbstractCommand
     {
         $aColumns = [];
         $sEntityClass = $oRepository->getEntityClass();
-        $oReflection = new \ReflectionClass($sEntityClass);
-        foreach ($oReflection->getProperties() as $oProperty) {
-            $aColumns [] = $this->getColumn($oProperty);
+        try {
+            $oReflection = new \ReflectionClass($sEntityClass);
+            foreach ($oReflection->getProperties() as $oProperty) {
+                if (!$this->isManyToMany($oProperty)) {
+                    $aColumns [] = $this->getColumn($oProperty);
+                }
+            }
+        } catch (\ReflectionException $oException) {
+            $this->getLogger()->error("Cannot load entity class '$sEntityClass'. " . $oException->getMessage());
         }
 
         return $aColumns;
     }
 
     /**
-     * Get column from reflection property.
+     * Check if given property is a table link or not.
      *
      * @param \ReflectionProperty $oProperty property.
      *
-     * @return TableColumn column.
+     * @return bool true if given property is a table link.
      */
-    private function getColumn(\ReflectionProperty $oProperty): TableColumn
+    private function isManyToMany(\ReflectionProperty $oProperty): bool
     {
-        $oAnnotationReader = new AnnotationReader();
+        return null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty, ManyToMany::class);
+    }
 
+    /**
+     * Get the right variable type.
+     *
+     * @param \ReflectionProperty $oProperty property to retrieve variable.
+     *
+     * @return string variable type.
+     */
+    private function getVariableType(\ReflectionProperty $oProperty): string
+    {
         $sVariableType = substr($oProperty->getDocComment(),
             strpos($oProperty->getDocComment(), '@var ') + strlen('@var '));
-        $sVariableType = substr($sVariableType, 0, strpos($sVariableType, ' '));
+        return substr($sVariableType, 0, strpos($sVariableType, ' '));
+    }
 
+    /**
+     * Get the SQL column type from property.
+     *
+     * @param \ReflectionProperty $oProperty
+     * @return string SQL column type.
+     */
+    private function getSqlType(\ReflectionProperty $oProperty): string
+    {
         // get length
         $iLength = null;
         /** @var Length $oLengthAnnotation */
-        $oLengthAnnotation = $oAnnotationReader->getPropertyAnnotation($oProperty, Length::class);
+        $oLengthAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty, Length::class);
         if (null !== $oLengthAnnotation) {
             $iLength = $oLengthAnnotation->getLength();
         }
 
         // get SQL type
-        switch ($sVariableType) {
+        switch ($this->getVariableType($oProperty)) {
             case 'bool':
             case 'boolean':
                 $sSqlType = 'TINYINT(1) UNSIGNED';
@@ -187,9 +297,11 @@ class StructureUpdateCommand extends AbstractCommand
                 if (null === $iLength) {
                     $iLength = 11;
                 }
+                // TODO switch ($iLength ) : tinyint, smallint, mediumint, int, long
                 $sSqlType = "INT($iLength) UNSIGNED";
                 break;
             case 'float':
+                // TODO decimal, float or double
                 $sSqlType = "DOUBLE";
                 break;
             // TODO other types
@@ -201,18 +313,93 @@ class StructureUpdateCommand extends AbstractCommand
                 break;
         }
 
+        return $sSqlType;
+    }
+
+    /**
+     * Get column from reflection property.
+     *
+     * @param \ReflectionProperty $oProperty property.
+     *
+     * @return TableColumn column.
+     */
+    private function getColumn(\ReflectionProperty $oProperty): TableColumn
+    {
+        $sSqlType = $this->getSqlType($oProperty);
+
         // check if nullable
         /** @var Nullable $oNullableAnnotation */
-        $oNullableAnnotation = $oAnnotationReader->getPropertyAnnotation($oProperty, Nullable::class);
+        $oNullableAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty, Nullable::class);
         $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
 
-        $bAutoIncrement = null !== $oAnnotationReader->getPropertyAnnotation($oProperty, AutoIncrement::class);
+        $bAutoIncrement = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
+                AutoIncrement::class);
+
+        $bPrimary = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty, PrimaryKey::class);
 
         // TODO default value
         $sDefaultValue = null;
 
-        $oColumn = new TableColumn($oProperty->getName(), $sSqlType, $bNullable, $sDefaultValue, $bAutoIncrement);
+        return new TableColumn(
+            $oProperty->getName(),
+            $sSqlType,
+            $bNullable,
+            $sDefaultValue,
+            $bAutoIncrement,
+            $bPrimary
+        );
+    }
 
-        return $oColumn;
+    /**
+     * Create a Many to Many table.
+     *
+     * @param AbstractRepository $oCurrentRepository current repository instance.
+     * @param AbstractRepository $oForeignRepository foreign repository instance.
+     * @param ManyToMany $oAnnotation annotation.
+     * @return bool true if success, otherwise false.
+     */
+    private function createManyToManyTable(
+        AbstractRepository $oCurrentRepository,
+        AbstractRepository $oForeignRepository,
+        ManyToMany $oAnnotation
+    ): bool {
+        $bSuccess = false;
+        try {
+            $oCurrentReflection = new \ReflectionClass($oCurrentRepository->getEntityClass());
+            $oForeignReflection = new \ReflectionClass($oForeignRepository->getEntityClass());
+
+            $sDatabaseName = $this->getConnector()->getConfiguration()->getDatabaseName();
+
+            $sCurrentIdType = $this->getSqlType($oCurrentReflection->getProperty('id'));
+            $sForeignIdType = $this->getSqlType($oForeignReflection->getProperty('id'));
+
+            $sQuery = '';
+            $sQuery .= "CREATE TABLE $sDatabaseName.{$oAnnotation->table} ( ";
+            $sQuery .= "  {$oAnnotation->current_id} $sCurrentIdType,";
+            $sQuery .= "  {$oAnnotation->foreign_id} $sForeignIdType,";
+            $sQuery .= "  PRIMARY KEY ({$oAnnotation->current_id}, {$oAnnotation->foreign_id}),";
+            // Foreign key on Current Entity
+            $sQuery .= "  FOREIGN KEY ({$oAnnotation->current_id})";
+            $sQuery .= "  REFERENCES $sDatabaseName.{$oCurrentRepository->getTable()} (id)";
+            $sQuery .= "  ON DELETE CASCADE";
+            $sQuery .= "  ON UPDATE CASCADE,";
+            // Foreign key on Foreign Entity
+            $sQuery .= "  FOREIGN KEY ({$oAnnotation->foreign_id})";
+            $sQuery .= "  REFERENCES $sDatabaseName.{$oForeignRepository->getTable()} (id)";
+            $sQuery .= "  ON DELETE CASCADE";
+            $sQuery .= "  ON UPDATE CASCADE";
+            $sQuery .= " ) ";
+            $sQuery .= "ENGINE = InnoDB ";
+            $sQuery .= "DEFAULT CHARACTER SET = utf8;";
+
+            $this->getConnector()->execute($sQuery);
+            $bSuccess = true;
+        } catch (\ReflectionException $oException) {
+            $this->getLogger()->error("Cannot create reflection class : " . $oException->getMessage());
+        } catch (QueryException $oException) {
+            $this->getLogger()->error("QueryException : " . $oException->getMessage());
+        }
+
+        return $bSuccess;
     }
 }
