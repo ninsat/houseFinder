@@ -10,10 +10,6 @@ namespace YoannBlot\Framework\Model\DataBase;
  */
 class TableColumn
 {
-    const NULLABLE = '@nullable=';
-    const LENGTH = '@length=';
-    const AUTO_INCREMENT = '@AutoIncrement';
-
     /**
      * @var string column name.
      */

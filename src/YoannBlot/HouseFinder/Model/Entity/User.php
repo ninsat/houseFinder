@@ -26,4 +26,22 @@ final class User extends AbstractEntity
      */
     protected $cities = [];
 
+    /**
+     * @inheritdoc
+     */
+    public function __toString(): string
+    {
+        $sString = '';
+        if (AbstractEntity::DEFAULT_ID === $this->getId()) {
+            $sString .= '[NEW User]';
+        } else {
+            $sString .= '[User #' . $this->getId() . ']';
+        }
+        $sString .= " searches cities : ";
+        foreach ($this->getCities() as $oCity) {
+            $sString .= $oCity;
+        }
+
+        return $sString;
+    }
 }

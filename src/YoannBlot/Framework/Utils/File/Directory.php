@@ -10,7 +10,8 @@ namespace YoannBlot\Framework\Utils\File;
  * @package YoannBlot\Framework\Utils\File
  * @author  Yoann Blot
  */
-abstract class Directory {
+abstract class Directory
+{
 
     /**
      * Create a directory and its sub directories.
@@ -19,13 +20,14 @@ abstract class Directory {
      *
      * @return boolean true if success, false otherwise.
      */
-    public static function create (string $sDirectoryPath) : bool {
+    public static function create(string $sDirectoryPath): bool
+    {
         $bSuccess = false;
         if (is_dir($sDirectoryPath)) {
             $bSuccess = true;
         } else {
             if ('' !== $sDirectoryPath) {
-                $bSuccess = @mkdir($sDirectoryPath, 0705, true);
+                $bSuccess = mkdir($sDirectoryPath, 0705, true);
             }
         }
 
@@ -39,7 +41,8 @@ abstract class Directory {
      *
      * @return boolean success.
      */
-    public static function delete (string $sDirectory) : bool {
+    public static function delete(string $sDirectory): bool
+    {
         if (!file_exists($sDirectory)) {
             $bSuccess = true;
         } else {
@@ -49,9 +52,9 @@ abstract class Directory {
                         self::delete($sDirectory . DIRECTORY_SEPARATOR . $sFile);
                     }
                 }
-                $bSuccess = @rmdir($sDirectory);
+                $bSuccess = rmdir($sDirectory);
             } else {
-                $bSuccess = @unlink($sDirectory);
+                $bSuccess = unlink($sDirectory);
             }
         }
 

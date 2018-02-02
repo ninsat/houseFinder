@@ -20,6 +20,11 @@ class Container
 {
 
     /**
+     * Suffix for retrieving a group list.
+     */
+    const ALL_SUFFIX = 'ServicesList';
+
+    /**
      * @var array services.
      */
     private $aServices = [];
@@ -57,10 +62,13 @@ class Container
             if ($oLoader->load($sServiceFile)) {
                 foreach ($oLoader->getAll('SERVICES') as $sServiceName => $sServiceClass) {
                     if (!array_key_exists($sServiceName, $this->aServices)) {
-                        $oReflection = new \ReflectionClass($sServiceClass);
-                        $oService = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
-
-                        $this->aServices[$sServiceName] = $oService;
+                        try {
+                            $oReflection = new \ReflectionClass($sServiceClass);
+                            $oService = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
+                            $this->aServices[$sServiceName] = $oService;
+                        } catch (\ReflectionException $e) {
+                            $this->getLogger()->error("Cannot load service from class '$sServiceClass'.");
+                        }
                     }
                 }
             }
@@ -111,8 +119,8 @@ class Container
                     $oService = $this->getService($oConstructorParameter->getType()->getName());
                     if (null !== $oService) {
                         $aServiceParameters [] = $oService;
-                    } elseif ('repositories' === $oConstructorParameter->getName()) {
-                        $aServiceParameters [] = $this->getAllRepositories();
+                    } elseif (false !== strrpos($oConstructorParameter->getName(), static::ALL_SUFFIX)) {
+                        $aServiceParameters [] = $this->getServicesFromGroup($oConstructorParameter->getName());
                     }
                 } elseif (array_key_exists($oConstructorParameter->getName(), $this->aParameters)) {
                     $aServiceParameters [] = $this->aParameters[$oConstructorParameter->getName()];
@@ -138,17 +146,22 @@ class Container
     }
 
     /**
-     * @return AbstractRepository[] all repositories.
+     * Get all services from given group name.
+     *
+     * @param string $sServiceGroupName service name.
+     *
+     * @return array services matched given group.
      */
-    private function getAllRepositories(): array
+    private function getServicesFromGroup(string $sServiceGroupName): array
     {
-        $aRepositories = [];
+        $sServiceGroupName = substr($sServiceGroupName, 0, strrpos($sServiceGroupName, static::ALL_SUFFIX));
+        $aMatchedServices = [];
         foreach ($this->aServices as $sServiceName => $oService) {
-            if ($oService instanceof AbstractRepository) {
-                $aRepositories[] = $oService;
+            if (0 === strpos($sServiceName, $sServiceGroupName)) {
+                $aMatchedServices[] = $oService;
             }
         }
-        return $aRepositories;
+        return $aMatchedServices;
     }
 
     /**
@@ -169,15 +182,18 @@ class Container
                 if (false === strpos($sControllerPath, 'Abstract')) {
                     $sControllerPath = str_replace([SRC_PATH, '.php'], '', $sControllerPath);
                     $sControllerPath = str_replace('/', '\\', $sControllerPath);
-                    $oReflection = new \ReflectionClass($sControllerPath);
-
-                    $oController = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
-                    if (
-                        ($oController instanceof AbstractController && $oController->matchPath($sPath))
-                        &&
-                        (null === $oSelectedController || strlen($oController->getControllerPattern()) > strlen($oSelectedController->getControllerPattern()))
-                    ) {
-                        $oSelectedController = $oController;
+                    try {
+                        $oReflection = new \ReflectionClass($sControllerPath);
+                        $oController = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
+                        if (
+                            ($oController instanceof AbstractController && $oController->matchPath($sPath))
+                            &&
+                            (null === $oSelectedController || strlen($oController->getControllerPattern()) > strlen($oSelectedController->getControllerPattern()))
+                        ) {
+                            $oSelectedController = $oController;
+                        }
+                    } catch (\ReflectionException $e) {
+                        $this->getLogger()->error("Cannot load controller from path '$sControllerPath'.");
                     }
                 }
             }
@@ -205,12 +221,16 @@ class Container
                 if (false === strpos($sCommandPath, 'Abstract')) {
                     $sCommandPath = str_replace([SRC_PATH, '.php'], '', $sCommandPath);
                     $sCommandPath = str_replace('/', '\\', $sCommandPath);
-                    $oReflection = new \ReflectionClass($sCommandPath);
 
-                    $oCommand = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
-                    if ($oCommand instanceof AbstractCommand && $sCommandName === $oCommand->getName()) {
-                        $oSelectedCommand = $oCommand;
-                        break;
+                    try {
+                        $oReflection = new \ReflectionClass($sCommandPath);
+                        $oCommand = $oReflection->newInstanceArgs($this->getAutowireParameters($oReflection));
+                        if ($oCommand instanceof AbstractCommand && $sCommandName === $oCommand->getName()) {
+                            $oSelectedCommand = $oCommand;
+                            break;
+                        }
+                    } catch (\ReflectionException $e) {
+                        $this->getLogger()->error("Cannot load command '$sCommandName' from path '$sCommandPath'.");
                     }
                 }
             }

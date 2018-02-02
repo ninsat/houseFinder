@@ -43,13 +43,17 @@ class StructureUpdateCommand extends AbstractCommand
      *
      * @param LoggerService $oLogger logger.
      * @param ConnectorInterface $oConnectorService connector service.
-     * @param AbstractRepository[] $repositories all repositories.
+     * @param AbstractRepository[] $repositoryServicesList all repositories.
      */
-    public function __construct(LoggerService $oLogger, ConnectorInterface $oConnectorService, array $repositories)
+    public function __construct(
+        LoggerService $oLogger,
+        ConnectorInterface $oConnectorService,
+        array $repositoryServicesList
+    )
     {
         parent::__construct($oLogger);
         $this->oConnector = $oConnectorService;
-        $this->aRepositories = $repositories;
+        $this->aRepositories = $repositoryServicesList;
     }
 
     /**

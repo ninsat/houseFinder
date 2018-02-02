@@ -15,8 +15,24 @@ use YoannBlot\HouseFinder\Model\Entity\Common\PostalCode;
  * @package YoannBlot\HouseFinder\Model\Entity
  * @author  Yoann Blot
  */
-final class City extends AbstractEntity {
+final class City extends AbstractEntity
+{
 
     use Enabled, Name, PostalCode;
 
+    /**
+     * @inheritdoc
+     */
+    public function __toString(): string
+    {
+        $sString = '';
+        if (AbstractEntity::DEFAULT_ID === $this->getId()) {
+            $sString .= '[NEW City]';
+        } else {
+            $sString .= '[City #' . $this->getId() . ']';
+        }
+        $sString .= ' ' . $this->getName() . ' (' . $this->getPostalCode() . ')';
+
+        return $sString;
+    }
 }

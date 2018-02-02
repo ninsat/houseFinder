@@ -45,7 +45,6 @@ abstract class AbstractEntity
                     }
                 } catch (DataBaseException $e) {
                 }
-
             }
         }
     }
