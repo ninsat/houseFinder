@@ -34,6 +34,11 @@ class PdoService implements ConnectorInterface
     private $oConfiguration = null;
 
     /**
+     * @var array query parameters.
+     */
+    private $aQueryParameters = [];
+
+    /**
      * PdoService constructor.
      *
      * @param LoaderInterface $oLoaderService
@@ -58,6 +63,22 @@ class PdoService implements ConnectorInterface
     public function getConfiguration(): DataBaseConfig
     {
         return $this->oConfiguration;
+    }
+
+    /**
+     * @return array query parameters.
+     */
+    private function getParameters(): array
+    {
+        return $this->aQueryParameters;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function setParameters(array $aParameters): void
+    {
+        $this->aQueryParameters = $aParameters;
     }
 
     /**
@@ -157,7 +178,7 @@ class PdoService implements ConnectorInterface
     {
         $this->initConnection();
         $oStatement = $this->getConnection()->prepare($sQuery);
-        if (false === $oStatement->execute()) {
+        if (false === $oStatement->execute($this->getParameters())) {
             throw new QueryException($sQuery, $oStatement->errorInfo()[2], intval($oStatement->errorCode()));
         }
         $oObject = $oStatement->fetchObject($sClassName);
@@ -176,7 +197,7 @@ class PdoService implements ConnectorInterface
     {
         $this->initConnection();
         $oStatement = $this->getConnection()->prepare($sQuery);
-        if (false === $oStatement->execute()) {
+        if (false === $oStatement->execute($this->getParameters())) {
             throw new QueryException($sQuery, $oStatement->errorInfo()[2], intval($oStatement->errorCode()));
         }
         $aObjects = [];
@@ -186,4 +207,21 @@ class PdoService implements ConnectorInterface
 
         return $aObjects;
     }
+
+    /**
+     * @inheritdoc
+     */
+    public function getLastInsertId(): int
+    {
+        return intval($this->getConnection()->lastInsertId());
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function escape(string $sQuery): string
+    {
+        return $this->getConnection()->quote($sQuery);
+    }
+
 }

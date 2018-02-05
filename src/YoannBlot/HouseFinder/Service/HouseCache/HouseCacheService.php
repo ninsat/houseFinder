@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Service\HouseCache;
 
 use YoannBlot\Framework\Utils\File\Directory;
-use YoannBlot\HouseFinder\Service\HouseCrawler\HouseCrawlerInterface;
 
 /**
  * Class HouseCacheService.
@@ -15,39 +14,32 @@ class HouseCacheService
 {
 
     /**
-     * Cache file suffix.
-     */
-    const SUFFIX = '.cache';
-
-    /**
      * Cache expiration in seconds.
      */
     const EXPIRE = 3600;
 
     /**
-     * @var HouseCrawlerInterface
+     * @var string file name.
      */
-    private $oHouseFinder = null;
+    private $sFileName = '';
 
     /**
-     * Set the house finder.
+     * Check if given cache file name is valid.
      *
-     * @param HouseCrawlerInterface $oHouseFinder house finder.
-     */
-    public function setHouseFinder(HouseCrawlerInterface $oHouseFinder): void
-    {
-        $this->oHouseFinder = $oHouseFinder;
-    }
-
-    /**
+     * @param string $sNewCacheFileName cache file name.
+     * @param int $iExpirationTime expiration time in seconds.
+     *
      * @return bool true if cache is valid.
      */
-    public function isValid(): bool
+    public function isValid(string $sNewCacheFileName, int $iExpirationTime = self::EXPIRE): bool
     {
+        if (null !== $sNewCacheFileName) {
+            $this->sFileName = $sNewCacheFileName;
+        }
         $bValid = false;
         if (is_file($this->getPath())) {
             $iUpdateTimestamp = filemtime($this->getPath());
-            if (\time() - $iUpdateTimestamp < static::EXPIRE) {
+            if (\time() - $iUpdateTimestamp < $iExpirationTime) {
                 $bValid = true;
             }
         }
@@ -60,7 +52,7 @@ class HouseCacheService
      */
     public function getPath(): string
     {
-        return $this->getDirectory() . $this->getHouseFinder()->getName() . static::SUFFIX;
+        return $this->getDirectory() . $this->sFileName;
     }
 
     /**
@@ -72,8 +64,6 @@ class HouseCacheService
         $sDirectory .= ROOT_PATH . 'var' . DIRECTORY_SEPARATOR;
         $sDirectory .= 'cache' . DIRECTORY_SEPARATOR;
         $sDirectory .= 'houseFinder' . DIRECTORY_SEPARATOR;
-        $sDirectory .= $this->getHouseFinder()->getUser()->getId() . DIRECTORY_SEPARATOR;
-        $sDirectory .= $this->getHouseFinder()->getName() . DIRECTORY_SEPARATOR;
 
         Directory::create($sDirectory);
 
@@ -81,21 +71,17 @@ class HouseCacheService
     }
 
     /**
-     * @return HouseCrawlerInterface current house crawler.
-     */
-    private function getHouseFinder(): HouseCrawlerInterface
-    {
-        return $this->oHouseFinder;
-    }
-
-    /**
      * Save current content into cache file.
+     *
+     * @param string $sContent content to save.
      *
      * @return bool true if success, otherwise false.
      */
-    public function save(): bool
+    public function save(string $sContent): bool
     {
-        return file_put_contents($this->getPath(), file_get_contents($this->getHouseFinder()->getUrl())) > 0;
+        Directory::create(dirname($this->getPath()));
+
+        return file_put_contents($this->getPath(), $sContent) > 0;
     }
 
     /**

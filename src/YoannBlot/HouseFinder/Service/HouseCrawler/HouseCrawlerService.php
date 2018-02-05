@@ -39,8 +39,16 @@ class HouseCrawlerService
     {
         $bSuccess = true;
         foreach ($this->aHouseFinders as $oHouseFinder) {
-            if (!$oHouseFinder->process($oUser)) {
+            if (!$oHouseFinder->processLinks($oUser)) {
                 $bSuccess = false;
+            }
+        }
+
+        if ($bSuccess) {
+            foreach ($this->aHouseFinders as $oHouseFinder) {
+                if (!$oHouseFinder->parseHouses($oUser)) {
+                    $bSuccess = false;
+                }
             }
         }
 

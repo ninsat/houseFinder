@@ -40,6 +40,7 @@ class RetrieveHousesCommand extends AbstractCommand
         $oUser = new User();
         $oUser->setId(1);
         $oUser->setRent(1200);
+        $oUser->setSurface(70);
 
         $oPoissy = new City();
         $oPoissy->setName('Poissy');

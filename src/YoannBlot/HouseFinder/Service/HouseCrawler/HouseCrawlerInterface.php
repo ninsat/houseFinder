@@ -18,17 +18,20 @@ interface HouseCrawlerInterface
     public function getName(): string;
 
     /**
-     * @return string house crawler URL.
+     * Generate URL for retrieving all matched links.
+     *
+     * @return string base URL.
      */
-    public function getUrl(): string;
+    public function generateUrl(): string;
 
     /**
-     * Process current house crawler.
+     * Process current house crawler to retrieve valid links.
      *
      * @param User $oUser user preferences to process.
+     *
      * @return bool true if success, otherwise false.
      */
-    public function process(User $oUser): bool;
+    public function processLinks(User $oUser): bool;
 
     /**
      * Get the current user preferences.
@@ -36,4 +39,13 @@ interface HouseCrawlerInterface
      * @return User user.
      */
     public function getUser(): User;
+
+    /**
+     * Parse all houses.
+     *
+     * @param User $oUser user preferences to process.
+     *
+     * @return bool true if success, otherwise false.
+     */
+    public function parseHouses(User $oUser): bool;
 }

@@ -49,8 +49,7 @@ class StructureUpdateCommand extends AbstractCommand
         LoggerService $oLogger,
         ConnectorInterface $oConnectorService,
         array $repositoryServicesList
-    )
-    {
+    ) {
         parent::__construct($oLogger);
         $this->oConnector = $oConnectorService;
         $this->aRepositories = $repositoryServicesList;
@@ -205,6 +204,8 @@ class StructureUpdateCommand extends AbstractCommand
             }
             $aColumnsQuery[] = $sColumnQuery;
         }
+        // TODO columns foreign key
+
         $sQuery .= implode(',', $aColumnsQuery);
         if (count($aIdFields) > 0) {
             $sQuery .= "  ,PRIMARY KEY (" . implode(',', $aIdFields) . ') ';
@@ -239,7 +240,10 @@ class StructureUpdateCommand extends AbstractCommand
             $oReflection = new \ReflectionClass($sEntityClass);
             foreach ($oReflection->getProperties() as $oProperty) {
                 if (!$this->isManyToMany($oProperty)) {
-                    $aColumns [] = $this->getColumn($oProperty);
+                    $oColumn = $this->getColumn($oProperty);
+                    if (null !== $oColumn) {
+                        $aColumns [] = $oColumn;
+                    }
                 }
             }
         } catch (\ReflectionException $oException) {
@@ -281,7 +285,7 @@ class StructureUpdateCommand extends AbstractCommand
      * @param \ReflectionProperty $oProperty
      * @return string SQL column type.
      */
-    private function getSqlType(\ReflectionProperty $oProperty): string
+    private function getSqlType(\ReflectionProperty $oProperty): ?string
     {
         // get length
         $iLength = null;
@@ -292,7 +296,9 @@ class StructureUpdateCommand extends AbstractCommand
         }
 
         // get SQL type
-        switch ($this->getVariableType($oProperty)) {
+        $sVariableType = $this->getVariableType($oProperty);
+        $sSqlType = null;
+        switch ($sVariableType) {
             case 'bool':
             case 'boolean':
                 $sSqlType = 'TINYINT(1) UNSIGNED';
@@ -308,12 +314,22 @@ class StructureUpdateCommand extends AbstractCommand
                 // TODO decimal, float or double
                 $sSqlType = "DOUBLE";
                 break;
-            // TODO other types
-            default:
+            case '\DateTime':
+                $sSqlType = "DATETIME";
+                break;
+            case 'string':
                 if (null === $iLength) {
-                    $iLength = 500;
+                    $iLength = 255;
                 }
-                $sSqlType = "VARCHAR($iLength)";
+                if ($iLength < 1000) {
+                    $sSqlType = "VARCHAR($iLength)";
+                } else {
+                    $sSqlType = "TEXT";
+                }
+                break;
+            default :
+                $this->getLogger()->warning("Unknown SQL type for column @var = $sVariableType.");
+
                 break;
         }
 
@@ -325,33 +341,37 @@ class StructureUpdateCommand extends AbstractCommand
      *
      * @param \ReflectionProperty $oProperty property.
      *
-     * @return TableColumn column.
+     * @return TableColumn|null column.
      */
-    private function getColumn(\ReflectionProperty $oProperty): TableColumn
+    private function getColumn(\ReflectionProperty $oProperty): ?TableColumn
     {
+        $oColumn = null;
         $sSqlType = $this->getSqlType($oProperty);
+        if (null !== $sSqlType) {
+            // check if nullable
+            /** @var Nullable $oNullableAnnotation */
+            $oNullableAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty, Nullable::class);
+            $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
 
-        // check if nullable
-        /** @var Nullable $oNullableAnnotation */
-        $oNullableAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty, Nullable::class);
-        $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
+            $bAutoIncrement = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
+                    AutoIncrement::class);
 
-        $bAutoIncrement = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
-                AutoIncrement::class);
+            $bPrimary = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty, PrimaryKey::class);
 
-        $bPrimary = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty, PrimaryKey::class);
+            // TODO default value
+            $sDefaultValue = null;
 
-        // TODO default value
-        $sDefaultValue = null;
+            $oColumn = new TableColumn(
+                $oProperty->getName(),
+                $sSqlType,
+                $bNullable,
+                $sDefaultValue,
+                $bAutoIncrement,
+                $bPrimary
+            );
+        }
 
-        return new TableColumn(
-            $oProperty->getName(),
-            $sSqlType,
-            $bNullable,
-            $sDefaultValue,
-            $bAutoIncrement,
-            $bPrimary
-        );
+        return $oColumn;
     }
 
     /**

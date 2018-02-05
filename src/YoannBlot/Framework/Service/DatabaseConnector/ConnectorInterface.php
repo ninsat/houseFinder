@@ -22,6 +22,11 @@ interface ConnectorInterface
     public function getConfiguration(): DataBaseConfig;
 
     /**
+     * @param array $aParameters query parameters.
+     */
+    public function setParameters(array $aParameters): void;
+
+    /**
      * Close the connection.
      */
     public function close();
@@ -67,4 +72,20 @@ interface ConnectorInterface
      * @throws QueryException query exception.
      */
     public function queryMultiple(string $sQuery, string $sClassName): array;
+
+    /**
+     * Get the last id inserted into database.
+     *
+     * @return int last insert id.
+     */
+    public function getLastInsertId(): int;
+
+    /**
+     * Escape a query part.
+     *
+     * @param string $sQuery query to escape.
+     *
+     * @return string escaped query.
+     */
+    public function escape(string $sQuery): string;
 }

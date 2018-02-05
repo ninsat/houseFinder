@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Service\HouseFinder\SeLoger;
 
 use Symfony\Component\DomCrawler\Crawler;
+use YoannBlot\HouseFinder\Model\Entity\City;
+use YoannBlot\HouseFinder\Model\Entity\House;
 use YoannBlot\HouseFinder\Service\HouseFinder\AbstractHouseFinder;
 
 /**
@@ -16,7 +18,7 @@ class SeLogerService extends AbstractHouseFinder
     /**
      * @inheritdoc
      */
-    public function getUrl(): string
+    public function generateUrl(): string
     {
         $sUrl = '';
         $sUrl .= "http://www.seloger.com/list.htm?idtt=1&tri=d_dt_crea&";
@@ -48,19 +50,51 @@ class SeLogerService extends AbstractHouseFinder
     /**
      * @inheritdoc
      */
-    protected function parse(): bool
+    protected function getUrls(): array
     {
         $oCrawler = new Crawler($this->getHouseCache()->getContent());
-        $aLinks = $oCrawler->filter('body div.content section.liste_resultat article div.listing_infos > h2 > a')
-            ->each(function (Crawler $node) {
-                return $node->attr('href');
+        $aUrls = $oCrawler->filter('body div.content section.liste_resultat article div.listing_infos > h2 > a')
+            ->each(function (Crawler $oLinkElement) {
+                return $oLinkElement->attr('href');
             });
-        // TODO remove
-        var_dump($aLinks);
-        exit;
-        // TODO remove
 
-        return true;
+        return $aUrls;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getUniqueId(string $sUrl): string
+    {
+        // TODO
+        return 'test';
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function parseHouse(string $sUrl): ?House
+    {
+        // TODO
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getHouse(): House
+    {
+        // TODO: Implement getHouse() method.
+        return null;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function parseCity(): City
+    {
+        // TODO: Implement parseCity() method.
+        return null;
     }
 
 }

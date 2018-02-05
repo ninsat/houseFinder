@@ -109,7 +109,6 @@ class LoggerService implements LoggerInterface
         }
     }
 
-
     /**
      * @inheritdoc
      */

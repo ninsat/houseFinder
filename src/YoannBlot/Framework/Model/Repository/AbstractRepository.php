@@ -119,4 +119,79 @@ abstract class AbstractRepository
 
         return $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
     }
+
+    /**
+     * Get entity columns.
+     *
+     * @param AbstractEntity $oEntity entity.
+     *
+     * @return string[] columns with values.
+     */
+    private function getEntityColumns(AbstractEntity $oEntity): array
+    {
+        $aColumns = [];
+        try {
+            $oReflection = new \ReflectionClass($oEntity);
+            foreach ($oReflection->getProperties() as $oProperty) {
+                // TODO remove unnecessary fields
+                if ('id' !== $oProperty->getName()) {
+                    $oProperty->setAccessible(true);
+                    $mValue = $oProperty->getValue($oEntity);
+                    if (is_bool($mValue)) {
+                        $sSqlValue = ($mValue ? '1' : '0');
+                    } elseif ($mValue instanceof \DateTime) {
+                        $sSqlValue = $this->getConnector()->escape($mValue->format('Y-m-d H:i:s'));
+                    } elseif (is_int($mValue) || is_float($mValue)) {
+                        $sSqlValue = $mValue;
+                    } elseif (is_object($mValue)) {
+                        // TODO
+                        $this->getLogger()->error("Cannot save object of type " . get_class($mValue) . " in database");
+                        $sSqlValue = null;
+                    } else {
+                        $sSqlValue = $this->getConnector()->escape($mValue);
+                    }
+                    // TODO find a way for dynamic other types
+
+                    if (null !== $sSqlValue) {
+                        $aColumns [$oProperty->getName()] = $sSqlValue;
+                    }
+                }
+            }
+        } catch (\ReflectionException $e) {
+            $aColumns = [];
+        }
+        return $aColumns;
+    }
+
+    /**
+     * Insert an entity into table.
+     *
+     * @param AbstractEntity $oEntity entity to insert.
+     * @return AbstractEntity|null updated entity if success, otherwise null.
+     */
+    public function insert(AbstractEntity $oEntity): ?AbstractEntity
+    {
+        $aColumns = $this->getEntityColumns($oEntity);
+
+        $sQuery = '';
+        $sQuery .= ' INSERT INTO ' . $this->getTable() . ' (';
+        $sQuery .= implode(', ', array_keys($aColumns));
+        $sQuery .= ' )';
+        $sQuery .= ' VALUES (';
+        $sQuery .= implode(',', array_values($aColumns));
+        $sQuery .= ' );';
+
+        try {
+            if ($this->getConnector()->execute($sQuery)) {
+                $oEntity->setId($this->getConnector()->getLastInsertId());
+            } else {
+                $oEntity = null;
+            }
+        } catch (QueryException $oException) {
+            $this->getLogger()->error("Cannot create entity " . get_class($oEntity) . ' : ' . $oException->getMessage());
+            $oEntity = null;
+        }
+
+        return $oEntity;
+    }
 }
