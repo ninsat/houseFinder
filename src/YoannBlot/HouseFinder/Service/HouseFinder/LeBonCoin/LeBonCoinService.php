@@ -78,7 +78,7 @@ class LeBonCoinService extends AbstractHouseFinder
     {
         $oCity = new City();
 
-        $oCrawler = new Crawler($this->getHouseCache()->getContent());
+        $oCrawler = new Crawler(utf8_encode($this->getHouseCache()->getContent()));
         $sName = $oCrawler->filter('div.line_city > h2 > .value')->text();
         $sName = trim($sName);
         $sPostalCode = substr($sName, strrpos($sName, ' ') + 1);

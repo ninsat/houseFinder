@@ -21,7 +21,7 @@ class SeLogerService extends AbstractHouseFinder
     public function generateUrl(): string
     {
         $sUrl = '';
-        $sUrl .= "http://www.seloger.com/list.htm?idtt=1&tri=d_dt_crea&";
+        $sUrl .= "http://www.seloger.com/list_responsive_ajax_main.htm?naturebien=1&idtt=1&div=2238&tri=d_dt_crea&";
         $aFields = [];
         if ($this->getUser()->getRent() > 0) {
             $aFields[] = "pxmax=" . $this->getUser()->getRent();
@@ -52,11 +52,11 @@ class SeLogerService extends AbstractHouseFinder
      */
     protected function getUrls(): array
     {
-        $oCrawler = new Crawler($this->getHouseCache()->getContent());
-        $aUrls = $oCrawler->filter('body div.content section.liste_resultat article div.listing_infos > h2 > a')
-            ->each(function (Crawler $oLinkElement) {
-                return $oLinkElement->attr('href');
-            });
+        $sSelector = 'div.slideContent > a';
+        $oCrawler = new Crawler('<html><body>' . $this->getHouseCache()->getContent() . '</body></html>');
+        $aUrls = $oCrawler->filter($sSelector)->each(function (Crawler $oLinkElement) {
+            return $oLinkElement->attr('href');
+        });
 
         return $aUrls;
     }
@@ -66,26 +66,8 @@ class SeLogerService extends AbstractHouseFinder
      */
     protected function getUniqueId(string $sUrl): string
     {
-        // TODO
-        return 'test';
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function parseHouse(string $sUrl): ?House
-    {
-        // TODO
-        return null;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function getHouse(): House
-    {
-        // TODO: Implement getHouse() method.
-        return null;
+        $sId = substr($sUrl, 0, strpos($sUrl, '.htm'));
+        return substr($sId, strrpos($sId, '/') + 1);
     }
 
     /**
@@ -93,8 +75,45 @@ class SeLogerService extends AbstractHouseFinder
      */
     protected function parseCity(): City
     {
-        // TODO: Implement parseCity() method.
-        return null;
+        $oCity = new City();
+        $oCrawler = new Crawler($this->getHouseCache()->getContent());
+
+        $oCity->setName($oCrawler->filter('input[name="ville"]')->attr('value'));
+        $oCity->setPostalCode($oCrawler->filter('input[name="codepostal"]')->attr('value'));
+
+        return $oCity;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    protected function getHouse(): House
+    {
+        $oHouse = new House();
+        $oCrawler = new Crawler($this->getHouseCache()->getContent());
+        $oContentElement = $oCrawler->filter('div.resume > div.g-row')->first();
+
+        $oHouse->setTitle(trim($oCrawler->filter('h1')->text()));
+        $oHouse->setDescription($oCrawler->filter('input[name="description"]')->attr('value'));
+        $oHouse->setType($oContentElement->filter('h2.c-h2')->text());
+
+        foreach ($oContentElement->filter('ul.criterion > li') as $oDomElement) {
+            if (false !== strpos($oDomElement->nodeValue, 'pièces')) {
+                $oHouse->setPieces(intval($oDomElement->nodeValue));
+            } elseif (false !== strpos($oDomElement->nodeValue, 'chambres')) {
+                $oHouse->setBedrooms(intval($oDomElement->nodeValue));
+            } elseif (false !== strpos($oDomElement->nodeValue, 'm²')) {
+                $oHouse->setSurface(intval($oDomElement->nodeValue));
+            }
+        }
+
+        $fRent = htmlentities($oContentElement->filter('a[href="#about_price_anchor"]')->text());
+        $fRent = str_replace('&nbsp;', '', $fRent);
+        $fRent = html_entity_decode($fRent);
+        $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
+        $oHouse->setRent(floatval($fRent));
+
+        return $oHouse;
     }
 
 }

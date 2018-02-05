@@ -39,10 +39,11 @@ class RetrieveHousesCommand extends AbstractCommand
         // TODO retrieve parameter user
         $oUser = new User();
         $oUser->setId(1);
-        $oUser->setRent(1200);
+        $oUser->setRent(1300);
         $oUser->setSurface(70);
 
         $oPoissy = new City();
+        $oPoissy->setId(1);
         $oPoissy->setName('Poissy');
         $oPoissy->setPostalCode('78300');
         $oUser->addCity($oPoissy);

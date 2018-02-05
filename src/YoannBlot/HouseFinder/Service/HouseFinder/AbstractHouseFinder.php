@@ -106,6 +106,26 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     }
 
     /**
+     * Check if current city is in user preferences.
+     *
+     * @param City $oCity city to test.
+     *
+     * @return bool true if city is valid, otherwise false.
+     */
+    private function isValidCity(City $oCity): bool
+    {
+        $bValid = false;
+        foreach ($this->getUser()->getCities() as $oUserCity) {
+            if ($oCity->getId() === $oUserCity->getId()) {
+                $bValid = true;
+                break;
+            }
+        }
+
+        return $bValid;
+    }
+
+    /**
      * @inheritdoc
      */
     public function getName(): string
@@ -178,7 +198,7 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
         if ($this->getHouseCache()->isValid($this->getCacheDirectory() . static::JSON_CACHE)) {
             foreach ($this->getHouseRepository()->getAllNonExistentByUrl(json_decode($this->getHouseCache()->getContent())) as $sUrl) {
                 $oHouse = $this->parseHouse($sUrl);
-                if (null !== $oHouse) {
+                if (null !== $oHouse && $this->isValidCity($oHouse->getCity())) {
                     $oHouse->setUrl($sUrl);
                     $this->getHouseRepository()->insert($oHouse);
                     // TODO send notification to user

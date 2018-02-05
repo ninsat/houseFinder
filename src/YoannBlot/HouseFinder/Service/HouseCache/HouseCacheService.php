@@ -81,7 +81,7 @@ class HouseCacheService
     {
         Directory::create(dirname($this->getPath()));
 
-        return file_put_contents($this->getPath(), $sContent) > 0;
+        return file_put_contents($this->getPath(), trim($sContent)) > 0;
     }
 
     /**
