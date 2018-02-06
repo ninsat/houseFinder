@@ -7,6 +7,7 @@ use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use YoannBlot\Framework\Command\AbstractCommand;
 use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
+use YoannBlot\Framework\Model\DataBase\Annotation\DefaultValue;
 use YoannBlot\Framework\Model\DataBase\Annotation\Length;
 use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
@@ -429,8 +430,10 @@ class StructureUpdateCommand extends AbstractCommand
                     $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
                 }
 
-                // TODO default value
-                $sDefaultValue = null;
+                /** @var DefaultValue $oDefaultValueAnnotation */
+                $oDefaultValueAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
+                    DefaultValue::class);
+                $sDefaultValue = (null !== $oDefaultValueAnnotation) ? $oDefaultValueAnnotation->getValue() : null;
 
                 $oColumn = new TableColumn(
                     $oProperty->getName(),
@@ -494,8 +497,8 @@ class StructureUpdateCommand extends AbstractCommand
             $bSuccess = true;
         } catch (\ReflectionException $oException) {
             $this->getLogger()->error("Cannot create reflection class : " . $oException->getMessage());
-        } catch (QueryException $oException) {
-            $this->getLogger()->error("QueryException : " . $oException->getMessage());
+        } catch (DataBaseException $oException) {
+            $this->getLogger()->error("DataBaseException : " . $oException->getMessage());
         }
 
         return $bSuccess;
