@@ -42,7 +42,6 @@ class CityController extends AbstractController
         $this->oHouseRepository = $oHouseRepository;
     }
 
-
     /**
      * City page.
      *

@@ -19,10 +19,6 @@ use YoannBlot\Framework\DependencyInjection\Container;
  */
 class Kernel
 {
-    /**
-     * @var Container service container.
-     */
-    private $oContainer = null;
 
     /**
      * Kernel constructor.
@@ -42,10 +38,7 @@ class Kernel
      */
     private function getContainer(): Container
     {
-        if (null === $this->oContainer) {
-            $this->oContainer = new Container();
-        }
-        return $this->oContainer;
+        return Container::getInstance();
     }
 
     /**

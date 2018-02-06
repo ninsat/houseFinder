@@ -4,8 +4,6 @@ declare(strict_types=1);
 namespace YoannBlot\Framework\Model\Entity;
 
 use YoannBlot\Framework\Model\Entity\Common\IdPrimaryKey;
-use YoannBlot\Framework\Model\Exception\DataBaseException;
-use YoannBlot\Framework\Model\Repository\Loader;
 
 /**
  * Class AbstractEntity.
@@ -26,27 +24,7 @@ abstract class AbstractEntity
     /**
      * @var array waiting links.
      */
-    private $aLinks = [];
-
-    /**
-     * Add necessary links.
-     */
-    public function addLinks(): void
-    {
-        if (count($this->aLinks) > 0) {
-            foreach ($this->aLinks as $sLinkName => $iLinkValue) {
-                try {
-                    $oRepository = Loader::get($sLinkName);
-                    $oLinkedObject = $oRepository->get($iLinkValue);
-                    if (null !== $oLinkedObject) {
-                        $sLinkSetter = 'set' . ucfirst($sLinkName);
-                        $this->$sLinkSetter($oLinkedObject);
-                    }
-                } catch (DataBaseException $e) {
-                }
-            }
-        }
-    }
+    private $aForeignKeyValues = [];
 
     /**
      * @inheritdoc
@@ -55,7 +33,7 @@ abstract class AbstractEntity
     {
         $iIdPosition = strpos($name, static::FOREIGN_KEY_SUFFIX);
         if (!property_exists($this, $name) && false !== $iIdPosition) {
-            $this->aLinks [substr($name, 0, $iIdPosition)] = intval($value);
+            $this->aForeignKeyValues [substr($name, 0, $iIdPosition)] = intval($value);
         }
     }
 }

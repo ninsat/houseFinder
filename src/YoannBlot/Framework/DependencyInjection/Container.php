@@ -20,6 +20,22 @@ class Container
 {
 
     /**
+     * @var static current instance.
+     */
+    private static $oInstance = null;
+
+    /**
+     * @return Container get current instance.
+     */
+    public static function getInstance(): self
+    {
+        if (null === static::$oInstance) {
+            static::$oInstance = new static();
+        }
+        return static::$oInstance;
+    }
+
+    /**
      * Suffix for retrieving a group list.
      */
     const ALL_SUFFIX = 'ServicesList';
@@ -37,7 +53,7 @@ class Container
     /**
      * Container constructor.
      */
-    public function __construct()
+    private function __construct()
     {
         // default services
         $this->aServices[LoaderInterface::class] = new LoaderService();

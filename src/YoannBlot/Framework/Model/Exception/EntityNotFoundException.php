@@ -9,6 +9,6 @@ namespace YoannBlot\Framework\Model\Exception;
  * @package YoannBlot\Framework\Model\Exception
  * @author  Yoann Blot
  */
-class EntityNotFoundException extends DataBaseException {
-
+class EntityNotFoundException extends DataBaseException
+{
 }

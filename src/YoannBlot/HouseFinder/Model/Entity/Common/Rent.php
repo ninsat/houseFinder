@@ -21,7 +21,7 @@ trait Rent
      */
     public function getRent(): float
     {
-        return $this->rent;
+        return floatval($this->rent);
     }
 
     /**

@@ -12,12 +12,15 @@
         <?php endforeach; ?>
     </ul>
 </nav>
+<h2><?= count($houses); ?> maisons à louer</h2>
 <ul>
     <?php foreach ($houses as $house): ?>
         <li>
-            <a href="/house/<?= $house->getId(); ?>">
+            <a href="<?= $house->getUrl(); ?>">
                 <?= $house->getRent(); ?>&euro;
                 <?= $house->getTitle(); ?>
+                <?= $house->getCity()->getName(); ?>
+                <time><?= $house->getDate()->format('d/m/Y'); ?></time>
             </a>
         </li>
     <?php endforeach; ?>

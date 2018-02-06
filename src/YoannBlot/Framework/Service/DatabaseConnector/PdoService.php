@@ -6,9 +6,11 @@ namespace YoannBlot\Framework\Service\DatabaseConnector;
 use YoannBlot\Framework\Model\DataBase\ConfigurationConstants;
 use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
+use YoannBlot\Framework\Model\Exception\DataBaseException;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Service\ConfigurationLoader\LoaderInterface;
+use YoannBlot\Framework\Service\Repository\FactoryService;
 
 /**
  * Class PdoService.
@@ -39,13 +41,20 @@ class PdoService implements ConnectorInterface
     private $aQueryParameters = [];
 
     /**
+     * @var FactoryService repository factory.
+     */
+    private $oRepositoryService = [];
+
+    /**
      * PdoService constructor.
      *
-     * @param LoaderInterface $oLoaderService
+     * @param LoaderInterface $oLoaderService loader.
+     * @param FactoryService $oRepositoryService repository factory service.
      */
-    public function __construct(LoaderInterface $oLoaderService)
+    public function __construct(LoaderInterface $oLoaderService, FactoryService $oRepositoryService)
     {
         $this->oLoaderService = $oLoaderService;
+        $this->oRepositoryService = $oRepositoryService;
         $this->initConnection();
     }
 
@@ -185,9 +194,42 @@ class PdoService implements ConnectorInterface
         if (false === $oObject) {
             throw new EntityNotFoundException();
         }
-        $oObject->addLinks();
+        $this->addForeignValues($oObject);
 
         return $oObject;
+    }
+
+    /**
+     * Add foreign values to given entity.
+     *
+     * @param AbstractEntity $oEntity
+     */
+    private function addForeignValues(AbstractEntity $oEntity): void
+    {
+        try {
+            $oReflection = new \ReflectionClass(AbstractEntity::class);
+            $oProperty = $oReflection->getProperty('aForeignKeyValues');
+            $oProperty->setAccessible(true);
+            $aForeignValues = $oProperty->getValue($oEntity);
+            foreach ($aForeignValues as $sColumnName => $iForeignKeyValue) {
+                $oColumn = new \ReflectionProperty($oEntity, $sColumnName);
+
+                if (null !== $iForeignKeyValue && 0 !== $iForeignKeyValue) {
+                    $sForeignClass = substr($oColumn->getDocComment(),
+                        strpos($oColumn->getDocComment(), '@var ') + strlen('@var '));
+                    $sForeignClass = substr($sForeignClass, 0, strpos($sForeignClass, ' '));
+
+                    $oForeignRepository = $this->oRepositoryService->getRepository($sForeignClass);
+                    if (null !== $oForeignRepository) {
+                        $oForeignEntity = $oForeignRepository->get($iForeignKeyValue);
+                        $oColumn->setAccessible(true);
+                        $oColumn->setValue($oEntity, $oForeignEntity);
+                    }
+                }
+            }
+        } catch (\ReflectionException $e) {
+        } catch (DataBaseException $e) {
+        }
     }
 
     /**
@@ -202,6 +244,7 @@ class PdoService implements ConnectorInterface
         }
         $aObjects = [];
         foreach ($oStatement->fetchAll(\PDO::FETCH_CLASS, $sClassName) as $oObject) {
+            $this->addForeignValues($oObject);
             $aObjects [] = $oObject;
         }
 
