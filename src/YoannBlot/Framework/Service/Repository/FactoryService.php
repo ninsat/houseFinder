@@ -52,7 +52,7 @@ class FactoryService
         if (0 === strpos($sRepositoryName, '\\')) {
             $sRepositoryName = substr($sRepositoryName, 1);
         }
-        $oRepository = Container::getInstance()->getRepository($sRepositoryName);
+        $oRepository = Container::getInstance()->getService($sRepositoryName);
         if (null === $oRepository) {
             throw new RepositoryNotFoundException($sRepositoryName);
         }

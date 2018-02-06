@@ -7,7 +7,6 @@ use Psr\Log\LoggerInterface;
 use YoannBlot\Framework\Command\AbstractCommand;
 use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Model\DataBase\ConfigurationConstants;
-use YoannBlot\Framework\Model\Repository\AbstractRepository;
 use YoannBlot\Framework\Service\ConfigurationLoader\LoaderInterface;
 use YoannBlot\Framework\Service\ConfigurationLoader\LoaderService;
 
@@ -98,7 +97,7 @@ class Container
      *
      * @return \object|null service.
      */
-    private function getService(string $sServiceName)
+    public function getService(string $sServiceName)
     {
         $oFoundService = null;
 
@@ -144,21 +143,6 @@ class Container
             }
         }
         return $aServiceParameters;
-    }
-
-    /**
-     * Get a repository by its name.
-     *
-     * @param string $sRepositoryName repository name.
-     *
-     * @return null|AbstractRepository repository.
-     */
-    public function getRepository(string $sRepositoryName): ?AbstractRepository
-    {
-        /** @var AbstractRepository $oService */
-        $oService = $this->getService($sRepositoryName);
-
-        return $oService;
     }
 
     /**

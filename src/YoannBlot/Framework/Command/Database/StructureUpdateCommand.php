@@ -330,10 +330,21 @@ class StructureUpdateCommand extends AbstractCommand
                 break;
             case 'int':
                 if (null === $iLength) {
-                    $iLength = 11;
+                    $iLength = 9;
                 }
-                // TODO switch ($iLength ) : tinyint, smallint, mediumint, int, long
-                $sSqlType = "INT($iLength) UNSIGNED";
+                if ($iLength <= 2) {
+                    $sSqlType = 'tinyint';
+                } elseif ($iLength <= 4) {
+                    $sSqlType = 'smallint';
+                } elseif ($iLength <= 7) {
+                    $sSqlType = 'mediumint';
+                } elseif ($iLength <= 9) {
+                    $sSqlType = 'int';
+                } else {
+                    $sSqlType = 'bigint';
+                }
+
+                $sSqlType = "$sSqlType($iLength) unsigned";
                 break;
             case 'float':
                 // TODO decimal, float or double
@@ -404,15 +415,19 @@ class StructureUpdateCommand extends AbstractCommand
                 );
             } else {
                 $sSqlType = $this->getSqlType($oProperty);
-                // check if nullable
-                /** @var Nullable $oNullableAnnotation */
-                $oNullableAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty, Nullable::class);
-                $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
 
                 $bAutoIncrement = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
                         AutoIncrement::class);
 
                 $bPrimary = null !== $this->getAnnotationReader()->getPropertyAnnotation($oProperty, PrimaryKey::class);
+                if ($bPrimary) {
+                    $bNullable = false;
+                } else {
+                    /** @var Nullable $oNullableAnnotation */
+                    $oNullableAnnotation = $this->getAnnotationReader()->getPropertyAnnotation($oProperty,
+                        Nullable::class);
+                    $bNullable = (null === $oNullableAnnotation) || $oNullableAnnotation->isNullable();
+                }
 
                 // TODO default value
                 $sDefaultValue = null;

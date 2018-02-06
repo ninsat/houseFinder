@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace YoannBlot\Framework\Model\Entity\Common;
 
 use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
-use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
 use YoannBlot\Framework\Model\DataBase\Annotation\PrimaryKey;
 
 /**
@@ -17,7 +16,6 @@ trait IdPrimaryKey
 
     /**
      * @var int id
-     * @Nullable(false)
      * @AutoIncrement()
      * @PrimaryKey()
      */
