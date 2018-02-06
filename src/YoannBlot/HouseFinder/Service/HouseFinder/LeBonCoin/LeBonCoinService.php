@@ -55,9 +55,14 @@ class LeBonCoinService extends AbstractHouseFinder
     {
         $sSelector = 'section.mainList ul > li > a.list_item';
         $oCrawler = new Crawler($this->getHouseCache()->getContent());
-        $aUrls = $oCrawler->filter($sSelector)->each(function (Crawler $oLinkElement) {
-            return str_replace('//', 'https://', $oLinkElement->attr('href'));
-        });
+        try {
+            $aUrls = $oCrawler->filter($sSelector)->each(function (Crawler $oLinkElement) {
+                $sUrl = str_replace('//', 'https://', $oLinkElement->attr('href'));
+                return substr($sUrl, 0, strpos($sUrl, '.htm') + 4);
+            });
+        } catch (\Exception $e) {
+            $aUrls = [];
+        }
 
         return $aUrls;
     }

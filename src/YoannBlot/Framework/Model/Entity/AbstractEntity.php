@@ -5,7 +5,7 @@ namespace YoannBlot\Framework\Model\Entity;
 
 use YoannBlot\Framework\Model\Entity\Common\IdPrimaryKey;
 use YoannBlot\Framework\Model\Exception\DataBaseException;
-use YoannBlot\Framework\Model\Repository\AbstractRepository;
+use YoannBlot\Framework\Model\Repository\Loader;
 
 /**
  * Class AbstractEntity.
@@ -18,6 +18,8 @@ abstract class AbstractEntity
 {
 
     const DEFAULT_ID = -1;
+
+    const FOREIGN_KEY_SUFFIX = '_id';
 
     use IdPrimaryKey;
 
@@ -33,11 +35,8 @@ abstract class AbstractEntity
     {
         if (count($this->aLinks) > 0) {
             foreach ($this->aLinks as $sLinkName => $iLinkValue) {
-                // TODO link Repository with entity
-                $sRepositoryName = "YoannBlot\HouseFinder\Model\Repository\\" . ucfirst($sLinkName) . 'Repository';
-                /** @var AbstractRepository $oRepository */
-                $oRepository = new $sRepositoryName();
                 try {
+                    $oRepository = Loader::get($sLinkName);
                     $oLinkedObject = $oRepository->get($iLinkValue);
                     if (null !== $oLinkedObject) {
                         $sLinkSetter = 'set' . ucfirst($sLinkName);
@@ -54,7 +53,7 @@ abstract class AbstractEntity
      */
     public function __set($name, $value): void
     {
-        $iIdPosition = strpos($name, '_id');
+        $iIdPosition = strpos($name, static::FOREIGN_KEY_SUFFIX);
         if (!property_exists($this, $name) && false !== $iIdPosition) {
             $this->aLinks [substr($name, 0, $iIdPosition)] = intval($value);
         }

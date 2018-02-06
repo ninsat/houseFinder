@@ -10,24 +10,27 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  *
  * @package YoannBlot\HouseFinder\Model\Entity\Common
  */
-trait LinkToCity {
+trait LinkToCity
+{
 
     /**
-     * @var City linked city.
+     * @var \YoannBlot\HouseFinder\Model\Entity\City linked city.
      */
     private $city;
 
     /**
      * @return City city.
      */
-    public function getCity (): City {
+    public function getCity(): City
+    {
         return $this->city;
     }
 
     /**
      * @param City $city city.
      */
-    public function setCity (City $city) {
+    public function setCity(City $city)
+    {
         $this->city = $city;
     }
 

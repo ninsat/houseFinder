@@ -53,8 +53,8 @@ class HouseRepository extends AbstractRepository
      */
     public function getAllNonExistentByUrl(array $aUrls): array
     {
-        $sWhere = 'WHERE url in (:urls)';
-        $this->getConnector()->setParameters([':urls' => implode(',', $aUrls)]);
+        $sUrls = "'" . implode("','", $aUrls) . "'";
+        $sWhere = "WHERE url in ($sUrls)";
 
         foreach ($this->getAll($sWhere) as $oHouse) {
             $sKey = array_search($oHouse->getUrl(), $aUrls);

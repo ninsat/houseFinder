@@ -133,27 +133,25 @@ abstract class AbstractRepository
         try {
             $oReflection = new \ReflectionClass($oEntity);
             foreach ($oReflection->getProperties() as $oProperty) {
-                // TODO remove unnecessary fields
                 if ('id' !== $oProperty->getName()) {
                     $oProperty->setAccessible(true);
                     $mValue = $oProperty->getValue($oEntity);
+                    $sColumnName = $oProperty->getName();
                     if (is_bool($mValue)) {
                         $sSqlValue = ($mValue ? '1' : '0');
                     } elseif ($mValue instanceof \DateTime) {
                         $sSqlValue = $this->getConnector()->escape($mValue->format('Y-m-d H:i:s'));
                     } elseif (is_int($mValue) || is_float($mValue)) {
                         $sSqlValue = $mValue;
-                    } elseif (is_object($mValue)) {
-                        // TODO
-                        $this->getLogger()->error("Cannot save object of type " . get_class($mValue) . " in database");
-                        $sSqlValue = null;
+                    } elseif ($mValue instanceof AbstractEntity) {
+                        $sColumnName = $oProperty->getName() . AbstractEntity::FOREIGN_KEY_SUFFIX;
+                        $sSqlValue = $mValue->getId();
                     } else {
                         $sSqlValue = $this->getConnector()->escape($mValue);
                     }
-                    // TODO find a way for dynamic other types
 
                     if (null !== $sSqlValue) {
-                        $aColumns [$oProperty->getName()] = $sSqlValue;
+                        $aColumns [$sColumnName] = $sSqlValue;
                     }
                 }
             }

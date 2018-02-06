@@ -8,7 +8,8 @@ namespace YoannBlot\HouseFinder\Model\Entity\Common;
  *
  * @package YoannBlot\HouseFinder\Model\Entity\Common
  */
-trait Rent {
+trait Rent
+{
 
     /**
      * @var float rent.
@@ -18,16 +19,19 @@ trait Rent {
     /**
      * @return float
      */
-    public function getRent (): float {
+    public function getRent(): float
+    {
         return $this->rent;
     }
 
     /**
      * @param float $fRent
      */
-    public function setRent (float $fRent) {
-        if ($fRent >= 0 && $fRent < 2000) {
-            $this->rent = $fRent;
+    public function setRent(float $fRent)
+    {
+        if ($fRent < 0 || $fRent > 5000) {
+            $fRent = 0;
         }
+        $this->rent = $fRent;
     }
 }
