@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Repository;
 
+use YoannBlot\Framework\Model\DataBase\Annotation\TableName;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
+use YoannBlot\HouseFinder\Model\Entity\User;
 
 /**
  * Class UserRepository.
@@ -11,7 +13,10 @@ use YoannBlot\Framework\Model\Repository\AbstractRepository;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @table   houses_user
+ * @TableName("houses_user")
+ *
+ * @method User get(int $iId)
+ * @method User[] getAll(string $sWhere = '', string $sOrderBy = '', int $iLimit = 0)
  */
 class UserRepository extends AbstractRepository
 {

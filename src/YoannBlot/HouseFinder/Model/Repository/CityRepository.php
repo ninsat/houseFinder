@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Repository;
 
+use YoannBlot\Framework\Model\DataBase\Annotation\TableName;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
@@ -14,7 +15,8 @@ use YoannBlot\HouseFinder\Model\Entity\City;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @table   houses_city
+ * @TableName("houses_city")
+ * @method City get(int $iId)
  */
 class CityRepository extends AbstractRepository
 {

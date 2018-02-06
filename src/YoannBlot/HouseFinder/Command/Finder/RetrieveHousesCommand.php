@@ -4,8 +4,8 @@ namespace YoannBlot\HouseFinder\Command\Finder;
 
 use YoannBlot\Framework\Command\AbstractCommand;
 use YoannBlot\Framework\Service\Logger\LoggerService;
-use YoannBlot\HouseFinder\Model\Entity\City;
-use YoannBlot\HouseFinder\Model\Entity\User;
+use YoannBlot\HouseFinder\Model\Repository\Helper\UserTrait;
+use YoannBlot\HouseFinder\Model\Repository\UserRepository;
 use YoannBlot\HouseFinder\Service\HouseCrawler\HouseCrawlerService;
 use YoannBlot\HouseFinder\Service\HouseCrawler\HouseCrawlerTrait;
 
@@ -17,18 +17,23 @@ use YoannBlot\HouseFinder\Service\HouseCrawler\HouseCrawlerTrait;
 class RetrieveHousesCommand extends AbstractCommand
 {
 
-    use HouseCrawlerTrait;
+    use HouseCrawlerTrait, UserTrait;
 
     /**
      * RetrieveHousesCommand constructor.
      *
      * @param LoggerService $oLogger logger
      * @param HouseCrawlerService $oHouseCrawler house crawler
+     * @param UserRepository $oUserRepository user repository.
      */
-    public function __construct(LoggerService $oLogger, HouseCrawlerService $oHouseCrawler)
-    {
+    public function __construct(
+        LoggerService $oLogger,
+        HouseCrawlerService $oHouseCrawler,
+        UserRepository $oUserRepository
+    ) {
         parent::__construct($oLogger);
         $this->oHouseCrawler = $oHouseCrawler;
+        $this->oUserRepository = $oUserRepository;
     }
 
     /**
@@ -36,19 +41,17 @@ class RetrieveHousesCommand extends AbstractCommand
      */
     public function run(): bool
     {
-        // TODO retrieve parameter user
-        $oUser = new User();
-        $oUser->setId(1);
-        $oUser->setRent(1300);
-        $oUser->setSurface(70);
+        $bSuccess = false;
 
-        $oPoissy = new City();
-        $oPoissy->setId(1);
-        $oPoissy->setName('Poissy');
-        $oPoissy->setPostalCode('78300');
-        $oUser->addCity($oPoissy);
+        // TODO retrieve command parameter user id
+        $iUserId = 1;
 
-        return $this->oHouseCrawler->run($oUser);
+        $oUser = $this->oUserRepository->get($iUserId);
+        if (null !== $oUser) {
+            $bSuccess = $this->oHouseCrawler->run($oUser);
+        }
+
+        return $bSuccess;
     }
 
 }

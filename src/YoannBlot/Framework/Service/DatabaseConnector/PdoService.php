@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Service\DatabaseConnector;
 
+use Doctrine\Common\Annotations\AnnotationException;
+use Doctrine\Common\Annotations\AnnotationReader;
+use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\DataBase\ConfigurationConstants;
 use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
@@ -194,17 +197,18 @@ class PdoService implements ConnectorInterface
         if (false === $oObject) {
             throw new EntityNotFoundException();
         }
-        $this->addForeignValues($oObject);
+        $this->setManyToOneAssociations($oObject);
+        $this->setOneToManyAssociations($oObject);
 
         return $oObject;
     }
 
     /**
-     * Add foreign values to given entity.
+     * Add ManyToOne associations to given entity.
      *
-     * @param AbstractEntity $oEntity
+     * @param AbstractEntity $oEntity entity.
      */
-    private function addForeignValues(AbstractEntity $oEntity): void
+    private function setManyToOneAssociations(AbstractEntity $oEntity): void
     {
         try {
             $oReflection = new \ReflectionClass(AbstractEntity::class);
@@ -233,6 +237,63 @@ class PdoService implements ConnectorInterface
     }
 
     /**
+     * Check if given property is a table link or not.
+     *
+     * @param \ReflectionProperty $oProperty property.
+     *
+     * @return ManyToMany|null many to many column.
+     */
+    private function getManyToMany(\ReflectionProperty $oProperty): ?ManyToMany
+    {
+        try {
+            $oAnnotationReader = new AnnotationReader();
+            $oManyToMany = $oAnnotationReader->getPropertyAnnotation($oProperty, ManyToMany::class);
+        } catch (AnnotationException $e) {
+            $oManyToMany = null;
+        }
+
+        return $oManyToMany;
+    }
+
+    /**
+     * Load and set many to many associations.
+     *
+     * @param AbstractEntity $oEntity entity.
+     */
+    private function setOneToManyAssociations(AbstractEntity $oEntity): void
+    {
+        try {
+            $oReflection = new \ReflectionClass($oEntity);
+            foreach ($oReflection->getProperties() as $oProperty) {
+                $oManyToManyColumn = $this->getManyToMany($oProperty);
+                if (null !== $oManyToManyColumn) {
+                    $sForeignClass = substr($oProperty->getDocComment(),
+                        strpos($oProperty->getDocComment(), '@var ') + strlen('@var '));
+                    $sForeignClass = substr($sForeignClass, 0, strpos($sForeignClass, ' '));
+                    $iBracketPosition = strpos($sForeignClass, '[]');
+                    if (false !== $iBracketPosition) {
+                        $sForeignClass = substr($sForeignClass, 0, $iBracketPosition);
+                    }
+                    $oForeignRepository = $this->oRepositoryService->getRepository($sForeignClass);
+
+                    $sQuery = '';
+                    $sQuery .= " SELECT f.*";
+                    $sQuery .= " FROM {$oForeignRepository->getTable()} f";
+                    $sQuery .= " INNER JOIN {$oManyToManyColumn->table} l ON f.id = l.{$oManyToManyColumn->foreign_id} AND l.{$oManyToManyColumn->current_id} = :id";
+
+                    $this->setParameters([':id' => $oEntity->getId()]);
+                    $aValues = $this->queryMultiple($sQuery, $sForeignClass);
+
+                    $oProperty->setAccessible(true);
+                    $oProperty->setValue($oEntity, $aValues);
+                }
+            }
+        } catch (\ReflectionException $e) {
+        } catch (DataBaseException $e) {
+        }
+    }
+
+    /**
      * @inheritdoc
      */
     public function queryMultiple(string $sQuery, string $sClassName): array
@@ -244,7 +305,8 @@ class PdoService implements ConnectorInterface
         }
         $aObjects = [];
         foreach ($oStatement->fetchAll(\PDO::FETCH_CLASS, $sClassName) as $oObject) {
-            $this->addForeignValues($oObject);
+            $this->setManyToOneAssociations($oObject);
+            $this->setOneToManyAssociations($oObject);
             $aObjects [] = $oObject;
         }
 

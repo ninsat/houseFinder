@@ -27,10 +27,10 @@ class Kernel
      */
     public function __construct(bool $bAutoDisplay = true)
     {
+        $this->autoloadAnnotations();
         if ($bAutoDisplay) {
             $this->display();
         }
-        $this->autoloadAnnotations();
     }
 
     /**

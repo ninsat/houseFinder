@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Repository;
 
+use YoannBlot\Framework\Model\DataBase\Annotation\TableName;
 use YoannBlot\Framework\Model\Repository\AbstractRepository;
 use YoannBlot\HouseFinder\Model\Entity\City;
 use YoannBlot\HouseFinder\Model\Entity\House;
@@ -13,7 +14,7 @@ use YoannBlot\HouseFinder\Model\Entity\House;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @table   houses_house
+ * @TableName("houses_house")
  */
 class HouseRepository extends AbstractRepository
 {
