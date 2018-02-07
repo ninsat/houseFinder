@@ -66,7 +66,10 @@ class CityRepository extends AbstractRepository
     public function getOneByPostalCode(string $sPostalCode): ?City
     {
         $sQuery = '';
-        $sQuery .= "SELECT * FROM " . $this->getTable() . " WHERE lower(postal_code) = lower(:postalCode) LIMIT 1";
+        $sQuery .= " SELECT * ";
+        $sQuery .= " FROM " . $this->getTable();
+        $sQuery .= " WHERE lower(postal_code) = lower(:postalCode)";
+        $sQuery .= " LIMIT 1";
 
         $this->getConnector()->setParameters([':postalCode' => $sPostalCode]);
         try {
@@ -74,6 +77,35 @@ class CityRepository extends AbstractRepository
             $oCity = $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
         } catch (EntityNotFoundException $oException) {
             $this->getLogger()->info("City not found with postal code '$sPostalCode'.");
+            $oCity = null;
+        } catch (QueryException $oException) {
+            $this->getLogger()->error("Query exception : " . $oException->getMessage());
+        }
+
+        return $oCity;
+    }
+
+    /**
+     * Get a city from its name.
+     *
+     * @param string $sName name.
+     *
+     * @return null|City found city, or null.
+     */
+    public function getOneByName(string $sName): ?City
+    {
+        $sQuery = '';
+        $sQuery .= " SELECT * ";
+        $sQuery .= " FROM " . $this->getTable();
+        $sQuery .= " WHERE lower(name) = lower(:name)";
+        $sQuery .= " LIMIT 1";
+
+        $this->getConnector()->setParameters([':name' => $sName]);
+        try {
+            /** @var City $oCity */
+            $oCity = $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
+        } catch (EntityNotFoundException $oException) {
+            $this->getLogger()->info("City not found with name '$sName'.");
             $oCity = null;
         } catch (QueryException $oException) {
             $this->getLogger()->error("Query exception : " . $oException->getMessage());

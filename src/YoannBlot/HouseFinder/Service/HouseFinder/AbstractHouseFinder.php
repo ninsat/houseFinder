@@ -88,7 +88,11 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     private function getCity(): City
     {
         $oCity = $this->parseCity();
-        $oFoundCity = $this->getCityRepository()->getOneByPostalCode($oCity->getPostalCode());
+        if ('' !== $oCity->getPostalCode()) {
+            $oFoundCity = $this->getCityRepository()->getOneByPostalCode($oCity->getPostalCode());
+        } elseif ('' !== $oCity->getName()) {
+            $oFoundCity = $this->getCityRepository()->getOneByName($oCity->getName());
+        }
         if (null === $oFoundCity) {
             $oFoundCity = $this->getCityRepository()->insert($oCity);
         }
