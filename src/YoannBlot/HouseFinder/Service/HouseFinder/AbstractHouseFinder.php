@@ -36,7 +36,7 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     private $oUser;
 
     /**
-     * SeLogerService constructor.
+     * AbstractHouseFinder constructor.
      *
      * @param HouseCacheService $oCacheService cache service.
      * @param HouseImagesService $oHouseImagesService house images service.
@@ -166,14 +166,16 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
         $this->oUser = $oUser;
 
         // cache HTML content
-        if (!$this->getHouseCache()->isValid($this->getCacheDirectory() . static::HTML_CACHE)) {
-            $bSuccess = $this->getHouseCache()->save(file_get_contents($this->generateUrl()));
+        $sCacheFile = $this->getCacheDirectory() . static::HTML_CACHE;
+        if (!$this->getHouseCache()->isValid($sCacheFile)) {
+            $bSuccess = $this->getHouseCache()->save(file_get_contents($this->generateUrl()), $sCacheFile);
         }
 
         $aUrls = $this->getUrls();
-        if ($bSuccess && !$this->getHouseCache()->isValid($this->getCacheDirectory() . static::JSON_CACHE)) {
+        $sCacheFile = $this->getCacheDirectory() . static::JSON_CACHE;
+        if ($bSuccess && !$this->getHouseCache()->isValid($sCacheFile)) {
             // cache found URLs in JSON
-            $bSuccess = $this->getHouseCache()->save(json_encode($aUrls));
+            $bSuccess = $this->getHouseCache()->save(json_encode($aUrls), $sCacheFile);
         }
 
         return $bSuccess;

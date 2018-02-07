@@ -31,9 +31,9 @@ class HouseCacheService
      *
      * @return bool true if cache is valid.
      */
-    public function isValid(string $sNewCacheFileName, int $iExpirationTime = self::EXPIRE): bool
+    public function isValid(string $sNewCacheFileName = '', int $iExpirationTime = self::EXPIRE): bool
     {
-        if (null !== $sNewCacheFileName) {
+        if ('' !== $sNewCacheFileName) {
             $this->sFileName = $sNewCacheFileName;
         }
         $bValid = false;
@@ -74,11 +74,15 @@ class HouseCacheService
      * Save current content into cache file.
      *
      * @param string $sContent content to save.
+     * @param string $sNewCacheFileName cache file name.
      *
      * @return bool true if success, otherwise false.
      */
-    public function save(string $sContent): bool
+    public function save(string $sContent, string $sNewCacheFileName = ''): bool
     {
+        if ('' !== $sNewCacheFileName) {
+            $this->sFileName = $sNewCacheFileName;
+        }
         Directory::create(dirname($this->getPath()));
 
         return file_put_contents($this->getPath(), trim($sContent)) > 0;
