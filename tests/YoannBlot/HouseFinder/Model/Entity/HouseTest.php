@@ -106,18 +106,18 @@ class HouseTest extends TestCase {
         $oHouse = new House();
 
         // default value
-        static::assertEmpty($oHouse->getType());
+        static::assertEmpty($oHouse->getReferer());
 
         // invalid type
-        $oHouse->setType('');
-        static::assertEmpty($oHouse->getType());
-        $oHouse->setType('te');
-        static::assertEmpty($oHouse->getType());
+        $oHouse->setReferer('');
+        static::assertEmpty($oHouse->getReferer());
+        $oHouse->setReferer('te');
+        static::assertEmpty($oHouse->getReferer());
 
         // valid type
         $sType = 'leboncoin';
-        $oHouse->setType($sType);
-        static::assertEquals($sType, $oHouse->getType());
+        $oHouse->setReferer($sType);
+        static::assertEquals($sType, $oHouse->getReferer());
     }
 
     /**

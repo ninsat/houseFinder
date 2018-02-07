@@ -113,8 +113,6 @@ class LeBonCoinService extends AbstractHouseFinder
             $sKey = trim($oDomElement->nodeValue);
 
             switch ($sKey) {
-                // TODO bedrooms
-                // TODO other fields
                 case'Loyer mensuel':
                     $oHouse->setRent(floatval($oDomElement->parentNode->getAttribute('content')));
                     break;
@@ -127,10 +125,10 @@ class LeBonCoinService extends AbstractHouseFinder
                     $oHouse->setSurface(intval($fSurface));
                     break;
                 case 'Type de bien':
-                    $oHouse->setType(str_replace('\n', '', $oDomElement->nextSibling->nextSibling->nodeValue));
+                    $sPropertyType = str_replace('\n', '', $oDomElement->nextSibling->nextSibling->nodeValue);
+                    $oHouse->setPropertyType($sPropertyType);
                     break;
                 default :
-                    // TODO var_dump('Key not found : ' . $sKey);
                     break;
             }
         }
@@ -142,7 +140,7 @@ class LeBonCoinService extends AbstractHouseFinder
         //text:1
 
         // search inside description
-        if (null === $oHouse->getBedrooms()) {
+        if (0 === $oHouse->getBedrooms()) {
             $iBedroomsPosition = strpos($sDescription, 'chambre');
             if (false !== $iBedroomsPosition) {
                 $iBedrooms = substr($sDescription, 0, $iBedroomsPosition);

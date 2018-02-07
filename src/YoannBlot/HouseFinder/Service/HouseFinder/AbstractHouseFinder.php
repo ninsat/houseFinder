@@ -62,28 +62,6 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     protected abstract function getHouse(): House;
 
     /**
-     * Get a house from URL.
-     *
-     * @param string $sUrl url to parse.
-     *
-     * @return House|null matched house.
-     */
-    protected function parseHouse(string $sUrl): ?House
-    {
-        // create cache if necessary
-        $sHousePath = $this->getHousePath($sUrl);
-        if (!$this->getHouseCache()->isValid($sHousePath)) {
-            $this->getHouseCache()->save(file_get_contents($sUrl));
-        }
-
-        // parse content
-        $oHouse = $this->getHouse();
-        $oHouse->setCity($this->getCity());
-
-        return $oHouse;
-    }
-
-    /**
      * @inheritdoc
      */
     public function getUser(): User
@@ -189,6 +167,29 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     }
 
     /**
+     * Process a house : parse from URL.
+     *
+     * @param string $sUrl house URL to parse.
+     */
+    private function processHouse($sUrl): void
+    {
+        $sHousePath = $this->getHousePath($sUrl);
+        if (!$this->getHouseCache()->isValid($sHousePath)) {
+            $this->getHouseCache()->save(file_get_contents($sUrl));
+        }
+        $oCity = $this->getCity();
+        if ($this->isValidCity($oCity)) {
+            $oHouse = $this->getHouse();
+            $oHouse->setCity($oCity);
+            $oHouse->setReferer($this->getName());
+            $oHouse->setUrl($sUrl);
+
+            $this->getHouseRepository()->insert($oHouse);
+            // TODO send notification to user
+        }
+    }
+
+    /**
      * @inheritdoc
      */
     public function parseHouses(User $oUser): bool
@@ -197,12 +198,7 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
         $this->oUser = $oUser;
         if ($this->getHouseCache()->isValid($this->getCacheDirectory() . static::JSON_CACHE)) {
             foreach ($this->getHouseRepository()->getAllNonExistentByUrl(json_decode($this->getHouseCache()->getContent())) as $sUrl) {
-                $oHouse = $this->parseHouse($sUrl);
-                if (null !== $oHouse && $this->isValidCity($oHouse->getCity())) {
-                    $oHouse->setUrl($sUrl);
-                    $this->getHouseRepository()->insert($oHouse);
-                    // TODO send notification to user
-                }
+                $this->processHouse($sUrl);
             }
             $bSuccess = true;
         }

@@ -29,7 +29,7 @@ trait LinkToCity
     /**
      * @param City $city city.
      */
-    public function setCity(City $city)
+    public function setCity(City $city): void
     {
         $this->city = $city;
     }

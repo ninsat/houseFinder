@@ -27,7 +27,7 @@ trait Rent
     /**
      * @param float $fRent
      */
-    public function setRent(float $fRent)
+    public function setRent(float $fRent): void
     {
         if ($fRent < 0 || $fRent > 5000) {
             $fRent = 0;

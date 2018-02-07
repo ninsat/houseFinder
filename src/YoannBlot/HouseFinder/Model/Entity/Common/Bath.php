@@ -8,7 +8,8 @@ namespace YoannBlot\HouseFinder\Model\Entity\Common;
  *
  * @package YoannBlot\HouseFinder\Model\Entity\Common
  */
-trait Bath {
+trait Bath
+{
 
     /**
      * @var bool has bath.
@@ -18,14 +19,16 @@ trait Bath {
     /**
      * @return boolean
      */
-    public function hasBath (): bool {
-        return $this->has_bath;
+    public function hasBath(): bool
+    {
+        return boolval($this->has_bath);
     }
 
     /**
      * @param boolean $bHasBath
      */
-    public function setBath (bool $bHasBath) {
+    public function setBath(bool $bHasBath): void
+    {
         $this->has_bath = $bHasBath;
     }
 }

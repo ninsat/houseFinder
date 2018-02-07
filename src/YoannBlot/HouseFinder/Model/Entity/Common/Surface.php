@@ -24,7 +24,7 @@ trait Surface
      */
     public function getSurface(): int
     {
-        return $this->surface;
+        return intval($this->surface);
     }
 
     /**
@@ -32,8 +32,9 @@ trait Surface
      */
     public function setSurface(int $iSurface)
     {
-        if ($iSurface > 0 && $iSurface < 200) {
-            $this->surface = $iSurface;
+        if ($iSurface < 0 || $iSurface > 1000) {
+            $iSurface = 0;
         }
+        $this->surface = $iSurface;
     }
 }

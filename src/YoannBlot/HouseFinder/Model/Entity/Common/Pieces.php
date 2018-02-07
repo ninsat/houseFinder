@@ -24,16 +24,17 @@ trait Pieces
      */
     public function getPieces(): int
     {
-        return $this->pieces;
+        return intval($this->pieces);
     }
 
     /**
      * @param int $iPieces
      */
-    public function setPieces(int $iPieces)
+    public function setPieces(int $iPieces): void
     {
-        if ($iPieces > 0 && $iPieces < 10) {
-            $this->pieces = $iPieces;
+        if ($iPieces < 0 || $iPieces > 10) {
+            $iPieces = 0;
         }
+        $this->pieces = $iPieces;
     }
 }

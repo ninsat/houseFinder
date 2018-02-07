@@ -24,17 +24,18 @@ trait Bedrooms
      */
     public function getBedrooms(): int
     {
-        return $this->bedrooms;
+        return intval($this->bedrooms);
     }
 
     /**
      * @param int $iBedrooms
      */
-    public function setBedrooms(int $iBedrooms)
+    public function setBedrooms(int $iBedrooms): void
     {
-        if ($iBedrooms > 0 && $iBedrooms < 6) {
-            $this->bedrooms = $iBedrooms;
+        if ($iBedrooms < 0 || $iBedrooms > 10) {
+            $iBedrooms = 0;
         }
+        $this->bedrooms = $iBedrooms;
     }
 
 }

@@ -8,7 +8,8 @@ namespace YoannBlot\HouseFinder\Model\Entity\Common;
  *
  * @package YoannBlot\HouseFinder\Model\Entity\Common
  */
-trait Guarantee {
+trait Guarantee
+{
 
     /**
      * @var float guarantee.
@@ -18,16 +19,19 @@ trait Guarantee {
     /**
      * @return float
      */
-    public function getGuarantee (): ?float {
-        return $this->guarantee;
+    public function getGuarantee(): ?float
+    {
+        return floatval($this->guarantee);
     }
 
     /**
      * @param float $fGuarantee
      */
-    public function setGuarantee (float $fGuarantee) {
-        if ($fGuarantee >= 0 && $fGuarantee < 2000) {
-            $this->guarantee = $fGuarantee;
+    public function setGuarantee(float $fGuarantee): void
+    {
+        if ($fGuarantee < 0 || $fGuarantee > 10000) {
+            $fGuarantee = 0;
         }
+        $this->guarantee = $fGuarantee;
     }
 }

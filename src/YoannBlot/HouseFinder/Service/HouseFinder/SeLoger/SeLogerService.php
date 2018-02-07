@@ -95,7 +95,7 @@ class SeLogerService extends AbstractHouseFinder
 
         $oHouse->setTitle(trim($oCrawler->filter('h1')->text()));
         $oHouse->setDescription($oCrawler->filter('input[name="description"]')->attr('value'));
-        $oHouse->setType($oContentElement->filter('h2.c-h2')->text());
+        $oHouse->setPropertyType($oContentElement->filter('h2.c-h2')->text());
 
         foreach ($oContentElement->filter('ul.criterion > li') as $oDomElement) {
             if (false !== strpos($oDomElement->nodeValue, 'pièces')) {

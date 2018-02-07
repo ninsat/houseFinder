@@ -32,9 +32,9 @@ trait PostalCode
     /**
      * @param string $sPostalCode
      */
-    public function setPostalCode(string $sPostalCode)
+    public function setPostalCode(string $sPostalCode): void
     {
-        if (strlen($sPostalCode) > 2) {
+        if (strlen($sPostalCode) > 4) {
             $this->postal_code = $sPostalCode;
         }
     }
