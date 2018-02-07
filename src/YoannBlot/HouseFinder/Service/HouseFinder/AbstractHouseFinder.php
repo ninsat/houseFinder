@@ -13,6 +13,8 @@ use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
 use YoannBlot\HouseFinder\Service\HouseCache\HouseCacheService;
 use YoannBlot\HouseFinder\Service\HouseCache\HouseCacheTrait;
 use YoannBlot\HouseFinder\Service\HouseCrawler\HouseCrawlerInterface;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesService;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
 
 /**
  * Class AbstractHouseFinder.
@@ -25,7 +27,8 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     const HTML_CACHE = 'links.html';
     const JSON_CACHE = 'links.json';
 
-    use HouseCacheTrait, HouseTrait, CityTrait;
+    use HouseCacheTrait, HouseImagesTrait,
+        HouseTrait, CityTrait;
 
     /**
      * @var User user.
@@ -36,15 +39,18 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
      * SeLogerService constructor.
      *
      * @param HouseCacheService $oCacheService cache service.
+     * @param HouseImagesService $oHouseImagesService house images service.
      * @param HouseRepository $oHouseRepository house repository.
      * @param CityRepository $oCityRepository city repository.
      */
     public function __construct(
         HouseCacheService $oCacheService,
+        HouseImagesService $oHouseImagesService,
         HouseRepository $oHouseRepository,
         CityRepository $oCityRepository
     ) {
         $this->oHouseCacheService = $oCacheService;
+        $this->oHouseImagesService = $oHouseImagesService;
         $this->oHouseRepository = $oHouseRepository;
         $this->oCityRepository = $oCityRepository;
     }
@@ -60,6 +66,13 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
      * @return House house.
      */
     protected abstract function getHouse(): House;
+
+    /**
+     * Get the current city object.
+     *
+     * @return City city.
+     */
+    protected abstract function parseCity(): City;
 
     /**
      * @inheritdoc
@@ -184,8 +197,11 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
             $oHouse->setReferer($this->getName());
             $oHouse->setUrl($sUrl);
 
-            $this->getHouseRepository()->insert($oHouse);
-            // TODO send notification to user
+            $oHouse = $this->getHouseRepository()->insert($oHouse);
+            if (null !== $oHouse) {
+                $this->getHouseImages()->save($oHouse);
+                // TODO send notification to user
+            }
         }
     }
 
@@ -205,11 +221,4 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
 
         return $bSuccess;
     }
-
-    /**
-     * Get the current city object.
-     *
-     * @return City city.
-     */
-    protected abstract function parseCity(): City;
 }

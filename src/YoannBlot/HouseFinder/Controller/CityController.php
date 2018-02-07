@@ -9,6 +9,8 @@ use YoannBlot\HouseFinder\Model\Repository\CityRepository;
 use YoannBlot\HouseFinder\Model\Repository\Helper\CityTrait;
 use YoannBlot\HouseFinder\Model\Repository\Helper\HouseTrait;
 use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesService;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
 
 /**
  * Class CityController
@@ -21,7 +23,8 @@ use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
 class CityController extends AbstractController
 {
 
-    use CityTrait, HouseTrait;
+    use CityTrait, HouseTrait,
+        HouseImagesTrait;
 
     /**
      * CityController constructor.
@@ -30,16 +33,19 @@ class CityController extends AbstractController
      * @param bool $debug debug mode.
      * @param CityRepository $oCityRepository city repository.
      * @param HouseRepository $oHouseRepository house repository.
+     * @param HouseImagesService $oHouseImages house images service.
      */
     public function __construct(
         LoggerInterface $oLogger,
         $debug,
         CityRepository $oCityRepository,
-        HouseRepository $oHouseRepository
+        HouseRepository $oHouseRepository,
+        HouseImagesService $oHouseImages
     ) {
         parent::__construct($oLogger, $debug);
         $this->oCityRepository = $oCityRepository;
         $this->oHouseRepository = $oHouseRepository;
+        $this->oHouseImagesService = $oHouseImages;
     }
 
     /**
@@ -71,6 +77,9 @@ class CityController extends AbstractController
     {
         $oCity = $this->getCityRepository()->get($iCityId);
         $oLastHouses = $this->getHouseRepository()->getLast($oCity);
+        foreach ($oLastHouses as $oHouse) {
+            $this->getHouseImages()->loadOne($oHouse);
+        }
         $aCitites = $this->getCityRepository()->getAll();
 
         return [

@@ -113,6 +113,11 @@ class SeLogerService extends AbstractHouseFinder
         $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
         $oHouse->setRent(floatval($fRent));
 
+        // retrieve images
+        foreach ($oCrawler->filter('.carrousel__photos img.carrousel_image_visu') as $oImgElement) {
+            $oHouse->addImage($oImgElement->getAttribute('src'));
+        }
+
         return $oHouse;
     }
 

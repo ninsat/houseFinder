@@ -9,6 +9,8 @@ use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\Framework\Model\Exception\DataBaseException;
 use YoannBlot\HouseFinder\Model\Repository\Helper\HouseTrait;
 use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesService;
+use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
 
 /**
  * Class HouseController
@@ -21,7 +23,7 @@ use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
 class HouseController extends AbstractController
 {
 
-    use HouseTrait;
+    use HouseTrait, HouseImagesTrait;
 
     /**
      * HomeController constructor.
@@ -29,11 +31,17 @@ class HouseController extends AbstractController
      * @param LoggerInterface $oLogger logger.
      * @param bool $debug debug mode.
      * @param HouseRepository $oHouseRepository house repository.
+     * @param HouseImagesService $oHouseImagesService house images service.
      */
-    public function __construct(LoggerInterface $oLogger, $debug, HouseRepository $oHouseRepository)
-    {
+    public function __construct(
+        LoggerInterface $oLogger,
+        $debug,
+        HouseRepository $oHouseRepository,
+        HouseImagesService $oHouseImagesService
+    ) {
         parent::__construct($oLogger, $debug);
         $this->oHouseRepository = $oHouseRepository;
+        $this->oHouseImagesService = $oHouseImagesService;
     }
 
     /**
@@ -49,6 +57,7 @@ class HouseController extends AbstractController
     {
         try {
             $oHouse = $this->getHouseRepository()->get($iHouseId);
+            $this->getHouseImages()->loadAll($oHouse);
         } catch (DataBaseException $e) {
             throw new Redirect404Exception("House not found for id '$iHouseId'.");
         }

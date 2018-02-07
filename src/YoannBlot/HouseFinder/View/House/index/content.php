@@ -2,6 +2,14 @@
 /** @var \YoannBlot\HouseFinder\Model\Entity\House $house */
 ?>
 <h1><?= $house->getTitle(); ?></h1>
+<section class="images">
+    <ul>
+        <?php foreach ($house->getImages() as $iCountImage => $sImage): ?>
+            <img src="<?= $sImage; ?>" alt="image #<?= $iCountImage; ?> <?= $house->getTitle(); ?>"/>
+        <?php endforeach; ?>
+    </ul>
+</section>
+
 <p><?= nl2br($house->getDescription()); ?></p>
 <h2>Tarifs</h2>
 <dl>

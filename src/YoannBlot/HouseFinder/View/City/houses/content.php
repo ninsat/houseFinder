@@ -16,11 +16,16 @@
 <ul>
     <?php foreach ($houses as $house): ?>
         <li>
-            <a href="<?= $house->getUrl(); ?>">
-                <?= $house->getRent(); ?>&euro;
-                <?= $house->getTitle(); ?>
-                <?= $house->getCity()->getName(); ?>
-                <time><?= $house->getDate()->format('d/m/Y'); ?></time>
+            <a href="/house/<?= $house->getId(); ?>">
+                <figure>
+                    <img src="<?= $house->getMainImage(); ?>" alt="<?= $house->getTitle(); ?>"/>
+                    <figcaption>
+                        <?= $house->getRent(); ?>&euro;
+                        <?= $house->getTitle(); ?>
+                        <?= $house->getCity()->getName(); ?>
+                        <time><?= $house->getDate()->format('d/m/Y'); ?></time>
+                    </figcaption>
+                </figure>
             </a>
         </li>
     <?php endforeach; ?>

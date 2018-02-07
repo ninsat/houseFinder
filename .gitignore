@@ -4,3 +4,5 @@ var/logs
 vendor/
 tests/coverage
 composer.lock
+www/css
+www/houses

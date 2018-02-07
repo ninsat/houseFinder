@@ -6,6 +6,7 @@ namespace YoannBlot\Framework\Model\Repository;
 use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Psr\Log\LoggerInterface;
+use YoannBlot\Framework\Model\DataBase\Annotation\Exclude;
 use YoannBlot\Framework\Model\DataBase\Annotation\TableName;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
@@ -126,6 +127,32 @@ abstract class AbstractRepository
     }
 
     /**
+     * Check if the given column is including in database create / update query.
+     *
+     * @param \ReflectionProperty $oColumnProperty column to check.
+     * @param bool $bInsertMode true for insert mode, false for update mode.
+     *
+     * @return bool true if column is enabled in given mode.
+     */
+    private function isColumnEnabled(\ReflectionProperty $oColumnProperty, bool $bInsertMode): bool
+    {
+        $bEnabled = true;
+        if ($bInsertMode && 'id' === $oColumnProperty->getName()) {
+            $bEnabled = false;
+        } else {
+            try {
+                $oAnnotationReader = new AnnotationReader();
+                if (null !== $oAnnotationReader->getPropertyAnnotation($oColumnProperty, Exclude::class)) {
+                    $bEnabled = false;
+                }
+            } catch (AnnotationException $e) {
+            }
+        }
+
+        return $bEnabled;
+    }
+
+    /**
      * Get entity columns.
      *
      * @param AbstractEntity $oEntity entity.
@@ -137,11 +164,11 @@ abstract class AbstractRepository
         $aColumns = [];
         try {
             $oReflection = new \ReflectionClass($oEntity);
-            foreach ($oReflection->getProperties() as $oProperty) {
-                if ('id' !== $oProperty->getName()) {
-                    $oProperty->setAccessible(true);
-                    $mValue = $oProperty->getValue($oEntity);
-                    $sColumnName = $oProperty->getName();
+            foreach ($oReflection->getProperties() as $oColumnProperty) {
+                if ($this->isColumnEnabled($oColumnProperty, true)) {
+                    $oColumnProperty->setAccessible(true);
+                    $mValue = $oColumnProperty->getValue($oEntity);
+                    $sColumnName = $oColumnProperty->getName();
                     if (is_bool($mValue)) {
                         $sSqlValue = ($mValue ? '1' : '0');
                     } elseif ($mValue instanceof \DateTime) {
@@ -149,7 +176,7 @@ abstract class AbstractRepository
                     } elseif (is_int($mValue) || is_float($mValue)) {
                         $sSqlValue = $mValue;
                     } elseif ($mValue instanceof AbstractEntity) {
-                        $sColumnName = $oProperty->getName() . AbstractEntity::FOREIGN_KEY_SUFFIX;
+                        $sColumnName = $oColumnProperty->getName() . AbstractEntity::FOREIGN_KEY_SUFFIX;
                         $sSqlValue = $mValue->getId();
                     } else {
                         $sSqlValue = $this->getConnector()->escape($mValue);
@@ -163,6 +190,7 @@ abstract class AbstractRepository
         } catch (\ReflectionException $e) {
             $aColumns = [];
         }
+
         return $aColumns;
     }
 

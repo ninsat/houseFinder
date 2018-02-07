@@ -151,19 +151,13 @@ class LeBonCoinService extends AbstractHouseFinder
             }
         }
 
-        // TODO get pictures
-        /*
-        $sJsImages = $oCrawler->filter('section.adview_main script')->text();
-        // images[0] = "//img6.leboncoin.fr/images/6f2/6f2a832649d3fe17910b860a94654981ca8d6b0e.jpg";
+        // get pictures
+        $sJsImages = $oCrawler->filter('section.adview_main > script')->last()->text();
         preg_match_all("/images\[\d\] = \"(.*)\"/", $sJsImages, $aTmpImage);
 
-        $aImages = [];
         foreach ($aTmpImage[1] as $sImage) {
-            $sImage = str_replace('//', 'https://', $sImage);
-            $aImages[] = $sImage;
+            $oHouse->addImage($sImage);
         }
-        $oHouse->setImages($aImages);
-        */
 
         return $oHouse;
     }
