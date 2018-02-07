@@ -13,19 +13,22 @@
     </ul>
 </nav>
 <h2><?= count($houses); ?> maisons à louer</h2>
-<ul>
-    <?php foreach ($houses as $house): ?>
+<ul class="houses">
+    <?php foreach ($houses as $position => $house): ?>
         <li>
             <a href="/house/<?= $house->getId(); ?>">
                 <figure>
                     <img src="<?= $house->getMainImage(); ?>" alt="<?= $house->getTitle(); ?>"/>
                     <figcaption>
-                        <?= $house->getRent(); ?>&euro;
-                        <?= $house->getTitle(); ?>
-                        <?= $house->getCity()->getName(); ?>
-                        <time><?= $house->getDate()->format('d/m/Y'); ?></time>
+                        <mark class="position"><?= $position + 1; ?></mark>
+                        <time datetime="<?= $house->getDate()->format(DATE_ATOM); ?>">
+                            Ajouté le <?= $house->getDate()->format('d/m/Y'); ?>
+                        </time>
+                        <span class="rent"><?= $house->getRent(); ?>&euro;</span>
+                        <span class="surface"><?= $house->getSurface(); ?> m²</span>
                     </figcaption>
                 </figure>
+                <h3><?= $house->getTitle(); ?></h3>
             </a>
         </li>
     <?php endforeach; ?>

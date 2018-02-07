@@ -2,4 +2,4 @@
 /** @var \YoannBlot\HouseFinder\Model\Entity\City $city */
 /** @var \YoannBlot\HouseFinder\Model\Entity\House[] $houses */
 ?>
-<?= $city->getName(); ?> <?= $city->getPostalCode(); ?> | Recherche d'appartements | <?= count($houses); ?> maisons disponibles à louer
+Recherche sur <?= $city->getName(); ?> <?= $city->getPostalCode(); ?> d'appartements ou maisons, <?= count($houses); ?> sont disponibles

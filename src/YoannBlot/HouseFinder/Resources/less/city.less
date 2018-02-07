@@ -1,0 +1,102 @@
+@import "common";
+
+@houseBorder: .1rem;
+
+ul.houses {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  text-align: center;
+  align-items: stretch;
+
+  > li {
+    list-style-type: none;
+    width: 33%;
+
+    > a {
+      display: block;
+      > h3 {
+        opacity: 0;
+        transition: all 1s;
+        text-align: center;
+        font-size: 1.4rem;
+        margin: 0;
+        padding: .5rem 1rem;
+        background: @primaryColor;
+        color: @whiteColor;
+      }
+      > figure {
+        .no-space();
+        position: relative;
+        > img {
+          border: @houseBorder solid @primaryColor;
+          opacity: .6;
+          transition: all 1s;
+          max-width: 100%;
+        }
+        > figcaption {
+          > mark.position {
+            position: absolute;
+            top: @houseBorder;
+            background: @secondaryColor;
+            color: @primaryColor;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: .3rem .8rem;
+            border: 1px solid @primaryColor;
+            border-radius: 2rem;
+            z-index: 10;
+            opacity: .8;
+          }
+          > time {
+            position: absolute;
+            top: @houseBorder;
+            right: @houseBorder;
+            background: @whiteColor;
+            color: @primaryColor;
+            font-size: 1rem;
+            font-weight: bold;
+            padding: .5rem 1rem;
+            z-index: 10;
+          }
+          > .rent {
+            position: absolute;
+            top: @houseBorder;
+            left: @houseBorder;
+            background: @primaryColor;
+            color: @whiteColor;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: .5rem 1rem;
+            z-index: 10;
+          }
+          > .surface {
+            position: absolute;
+            bottom: @houseBorder;
+            left: @houseBorder;
+            background: @primaryColor;
+            color: @whiteColor;
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: .5rem 1rem;
+            z-index: 10;
+          }
+        }
+      }
+
+      &:hover {
+        > h3 {
+          opacity: 1;
+          transition: all .5s;
+        }
+        > figure {
+          > img {
+            opacity: 1;
+            transition: all .5s;
+          }
+        }
+      }
+
+    }
+  }
+}

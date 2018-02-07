@@ -7,6 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>[[ title ]]</title>
     <link rel="icon" href="/favicon.ico"/>
+    [[ css ]]
 </head>
 <body>
 [[ content ]]

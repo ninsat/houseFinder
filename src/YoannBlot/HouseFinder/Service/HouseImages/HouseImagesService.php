@@ -13,7 +13,7 @@ use YoannBlot\HouseFinder\Model\Entity\House;
  */
 class HouseImagesService
 {
-    const DEFAULT_IMAGE = '/images/house/default.jpg';
+    const DEFAULT_IMAGE = 'images/house/default.jpg';
 
     /**
      * Load all images on given house.
