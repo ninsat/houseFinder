@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Controller;
 
 use Psr\Log\LoggerInterface;
-use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\Framework\Controller\Exception\Redirect404Exception;
 use YoannBlot\Framework\Model\Exception\DataBaseException;
 use YoannBlot\HouseFinder\Model\Repository\Helper\HouseTrait;
 use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
+use YoannBlot\HouseFinder\Model\Repository\UserRepository;
 use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesService;
 use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
 
@@ -20,7 +20,7 @@ use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
  *
  * @path("/house")
  */
-class HouseController extends AbstractController
+class HouseController extends AbstractUserController
 {
 
     use HouseTrait, HouseImagesTrait;
@@ -30,16 +30,18 @@ class HouseController extends AbstractController
      *
      * @param LoggerInterface $oLogger logger.
      * @param bool $debug debug mode.
+     * @param UserRepository $oUserRepository user repository.
      * @param HouseRepository $oHouseRepository house repository.
      * @param HouseImagesService $oHouseImagesService house images service.
      */
     public function __construct(
         LoggerInterface $oLogger,
         $debug,
+        UserRepository $oUserRepository,
         HouseRepository $oHouseRepository,
         HouseImagesService $oHouseImagesService
     ) {
-        parent::__construct($oLogger, $debug);
+        parent::__construct($oLogger, $debug, $oUserRepository);
         $this->oHouseRepository = $oHouseRepository;
         $this->oHouseImagesService = $oHouseImagesService;
     }

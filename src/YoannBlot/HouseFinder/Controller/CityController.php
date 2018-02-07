@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Controller;
 
 use Psr\Log\LoggerInterface;
-use YoannBlot\Framework\Controller\AbstractController;
 use YoannBlot\HouseFinder\Model\Repository\CityRepository;
 use YoannBlot\HouseFinder\Model\Repository\Helper\CityTrait;
 use YoannBlot\HouseFinder\Model\Repository\Helper\HouseTrait;
 use YoannBlot\HouseFinder\Model\Repository\HouseRepository;
+use YoannBlot\HouseFinder\Model\Repository\UserRepository;
 use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesService;
 use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
 
@@ -20,7 +20,7 @@ use YoannBlot\HouseFinder\Service\HouseImages\HouseImagesTrait;
  *
  * @path("/city")
  */
-class CityController extends AbstractController
+class CityController extends AbstractUserController
 {
 
     use CityTrait, HouseTrait,
@@ -31,6 +31,7 @@ class CityController extends AbstractController
      *
      * @param LoggerInterface $oLogger logger.
      * @param bool $debug debug mode.
+     * @param UserRepository $oUserRepository user repository.
      * @param CityRepository $oCityRepository city repository.
      * @param HouseRepository $oHouseRepository house repository.
      * @param HouseImagesService $oHouseImages house images service.
@@ -38,11 +39,12 @@ class CityController extends AbstractController
     public function __construct(
         LoggerInterface $oLogger,
         $debug,
+        UserRepository $oUserRepository,
         CityRepository $oCityRepository,
         HouseRepository $oHouseRepository,
         HouseImagesService $oHouseImages
     ) {
-        parent::__construct($oLogger, $debug);
+        parent::__construct($oLogger, $debug, $oUserRepository);
         $this->oCityRepository = $oCityRepository;
         $this->oHouseRepository = $oHouseRepository;
         $this->oHouseImagesService = $oHouseImages;
@@ -80,7 +82,7 @@ class CityController extends AbstractController
         foreach ($oLastHouses as $oHouse) {
             $this->getHouseImages()->loadOne($oHouse);
         }
-        $aCitites = $this->getCityRepository()->getAll();
+        $aCitites = $this->getCityRepository()->getAllAvailable($this->getUser());
 
         return [
             'cities' => $aCitites,

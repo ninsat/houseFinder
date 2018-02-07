@@ -14,6 +14,7 @@ use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Service\ConfigurationLoader\LoaderInterface;
 use YoannBlot\Framework\Service\Repository\FactoryService;
+use YoannBlot\Framework\Service\Repository\RepositoryFactoryTrait;
 
 /**
  * Class PdoService.
@@ -22,6 +23,8 @@ use YoannBlot\Framework\Service\Repository\FactoryService;
  */
 class PdoService implements ConnectorInterface
 {
+
+    use RepositoryFactoryTrait;
 
     /**
      * @var \PDO database connection object.
@@ -43,10 +46,6 @@ class PdoService implements ConnectorInterface
      */
     private $aQueryParameters = [];
 
-    /**
-     * @var FactoryService repository factory.
-     */
-    private $oRepositoryService = [];
 
     /**
      * PdoService constructor.
@@ -57,7 +56,7 @@ class PdoService implements ConnectorInterface
     public function __construct(LoaderInterface $oLoaderService, FactoryService $oRepositoryService)
     {
         $this->oLoaderService = $oLoaderService;
-        $this->oRepositoryService = $oRepositoryService;
+        $this->oRepositoryFactoryService = $oRepositoryService;
         $this->initConnection();
     }
 
@@ -223,7 +222,7 @@ class PdoService implements ConnectorInterface
                         strpos($oColumn->getDocComment(), '@var ') + strlen('@var '));
                     $sForeignClass = substr($sForeignClass, 0, strpos($sForeignClass, ' '));
 
-                    $oForeignRepository = $this->oRepositoryService->getRepository($sForeignClass);
+                    $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($sForeignClass);
                     if (null !== $oForeignRepository) {
                         $oForeignEntity = $oForeignRepository->get($iForeignKeyValue);
                         $oColumn->setAccessible(true);
@@ -274,7 +273,7 @@ class PdoService implements ConnectorInterface
                     if (false !== $iBracketPosition) {
                         $sForeignClass = substr($sForeignClass, 0, $iBracketPosition);
                     }
-                    $oForeignRepository = $this->oRepositoryService->getRepository($sForeignClass);
+                    $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($sForeignClass);
 
                     $sQuery = '';
                     $sQuery .= " SELECT f.*";
