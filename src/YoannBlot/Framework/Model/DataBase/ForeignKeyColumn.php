@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Model\DataBase;
 
+use YoannBlot\Framework\Validator\Boolean;
+
 /**
  * Class ForeignKeyColumn.
  *
@@ -32,6 +34,14 @@ class ForeignKeyColumn extends TableColumn
         $this->oForeignPrimaryKey = $oForeignPrimaryKey;
         $this->sForeignTableName = $sForeignTableName;
         parent::__construct($sName, $oForeignPrimaryKey->getType());
+    }
+
+    /**
+     * @param bool $bPrimary primary key.
+     */
+    public function setPrimaryKey(bool $bPrimary): void
+    {
+        $this->bPrimary = Boolean::getValue($bPrimary);
     }
 
     /**

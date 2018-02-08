@@ -6,7 +6,7 @@ namespace YoannBlot\HouseFinder\Model\Entity;
 use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\HouseFinder\Model\Entity\Common\{
-    Bath, Bedrooms, LinkToCities, Pieces, Rent, Surface, Referer
+    Bath, Bedrooms, LinkToCities, Pieces, Referer, Rent, Surface
 };
 
 /**
@@ -22,7 +22,7 @@ final class User extends AbstractEntity
 
     /**
      * @var \YoannBlot\HouseFinder\Model\Entity\City[] linked cities.
-     * @ManyToMany(table="houses_user_city", current_id="user_id", foreign_id="city_id")
+     * @ManyToMany()
      */
     protected $cities = [];
 

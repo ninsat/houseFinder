@@ -12,18 +12,4 @@ namespace YoannBlot\Framework\Model\DataBase\Annotation;
  */
 final class ManyToMany
 {
-    /**
-     * @var string
-     */
-    public $table;
-
-    /**
-     * @var string
-     */
-    public $current_id;
-
-    /**
-     * @var string
-     */
-    public $foreign_id;
 }

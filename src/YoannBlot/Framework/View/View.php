@@ -73,7 +73,6 @@ class View
         $this->bDebug = $bDebug;
     }
 
-
     /**
      * @return string cleaned current class name.
      */
@@ -188,9 +187,7 @@ class View
         if (count($aBlocks[1]) > 0) {
             foreach ($aBlocks[1] as &$sTemplateBlock) {
                 $sTemplateBlock = $this->getViewPath() . trim($sTemplateBlock) . static::TEMPLATE_EXT;
-                if (is_file($sTemplateBlock)) {
-                    $sTemplateBlock = file_get_contents($sTemplateBlock);
-                }
+                $sTemplateBlock = is_file($sTemplateBlock) ? file_get_contents($sTemplateBlock) : '';
             }
         }
         $sTemplateContent = str_replace($aBlocks[0], $aBlocks[1], $sTemplateContent);

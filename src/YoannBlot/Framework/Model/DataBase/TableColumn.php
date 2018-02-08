@@ -33,7 +33,7 @@ class TableColumn
     /**
      * @var bool true if column is a primary key, otherwise false.
      */
-    private $bPrimary = false;
+    protected $bPrimary = false;
 
     /**
      * @var string default column value.

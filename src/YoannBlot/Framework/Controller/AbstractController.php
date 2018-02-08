@@ -59,14 +59,17 @@ abstract class AbstractController
      */
     public function getControllerPattern(): string
     {
-        $oReflectionClass = new \ReflectionClass($this);
-        $oDocComment = $oReflectionClass->getDocComment();
-        preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
-        if (count($aPathAnnotations[1]) > 0) {
-            $sControllerPattern = $aPathAnnotations[1][0];
-        } else {
-            $sControllerPattern = '';
-            $this->getLogger()->error('You must add an annotation @path to your Controller ' . get_class($this));
+        $sControllerPattern = '';
+        try {
+            $oReflectionClass = new \ReflectionClass($this);
+            $oDocComment = $oReflectionClass->getDocComment();
+            preg_match_all('#@path\(\"(.*)\"\)#s', $oDocComment, $aPathAnnotations);
+            if (count($aPathAnnotations[1]) > 0) {
+                $sControllerPattern = $aPathAnnotations[1][0];
+            } else {
+                $this->getLogger()->error('You must add an annotation @path to your Controller ' . get_class($this));
+            }
+        } catch (\ReflectionException $e) {
         }
 
         return $sControllerPattern;
