@@ -6,7 +6,7 @@ namespace YoannBlot\HouseFinder\Model\Entity;
 use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
 use YoannBlot\HouseFinder\Model\Entity\Common\{
-    Bath, Bedrooms, LinkToCities, Pieces, Referer, Rent, Surface
+    Bath, Bedrooms, LinkToCities, Pieces, Rent, Surface
 };
 
 /**
@@ -18,7 +18,7 @@ use YoannBlot\HouseFinder\Model\Entity\Common\{
 final class User extends AbstractEntity
 {
 
-    use Referer, Pieces, Bedrooms, Surface, Bath, Rent, LinkToCities;
+    use Pieces, Bedrooms, Surface, Bath, Rent, LinkToCities;
 
     /**
      * @var \YoannBlot\HouseFinder\Model\Entity\City[] linked cities.

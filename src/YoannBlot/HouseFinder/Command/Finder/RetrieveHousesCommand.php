@@ -47,6 +47,7 @@ class RetrieveHousesCommand extends AbstractCommand
         $iUserId = 1;
 
         $oUser = $this->oUserRepository->get($iUserId);
+
         if (null !== $oUser) {
             $bSuccess = $this->oHouseCrawler->run($oUser);
         }

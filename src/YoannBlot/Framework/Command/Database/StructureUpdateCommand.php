@@ -63,7 +63,7 @@ class StructureUpdateCommand extends AbstractCommand
     {
         $bSuccess = true;
         foreach ($this->aRepositories as $oRepository) {
-            $this->getLogger()->info("Repository " . get_class($oRepository) . " => table '{$oRepository->getTable()}'.");
+            $this->getLogger()->info("Repository " . get_class($oRepository) . " => table '{$oRepository->getTableName()}'.");
             $oTable = $this->getStructureService()->getTable($oRepository);
             if (!$this->getTableService()->exists($oTable->getName()) && !$this->getTableService()->create($oTable)) {
                 $this->getLogger()->error("Error creating table '{$oTable->getName()}'.");

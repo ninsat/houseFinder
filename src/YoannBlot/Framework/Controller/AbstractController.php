@@ -102,32 +102,35 @@ abstract class AbstractController
      */
     public function autoSelectPage()
     {
-        $oReflectionClass = new \ReflectionClass($this);
         $bFound = false;
-        foreach ($oReflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $oMethod) {
-            // get all method xxxRoute()
-            if (false !== strrpos($oMethod->getName(), 'Route')) {
-                $sRoute = substr($oMethod->getName(), 0, strrpos($oMethod->getName(), 'Route'));
-                $sDocComment = $oMethod->getDocComment();
-                // get @path() from comment
-                preg_match_all('#@path\(\"(.*)\"\)#s', $sDocComment, $aPathAnnotations);
-                if (count($aPathAnnotations[1]) > 0) {
-                    $sPattern = $aPathAnnotations[1][0];
+        try {
+            $oReflectionClass = new \ReflectionClass($this);
+            foreach ($oReflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $oMethod) {
+                // get all method xxxRoute()
+                if (false !== strrpos($oMethod->getName(), 'Route')) {
+                    $sRoute = substr($oMethod->getName(), 0, strrpos($oMethod->getName(), 'Route'));
+                    $sDocComment = $oMethod->getDocComment();
+                    // get @path() from comment
+                    preg_match_all('#@path\(\"(.*)\"\)#s', $sDocComment, $aPathAnnotations);
+                    if (count($aPathAnnotations[1]) > 0) {
+                        $sPattern = $aPathAnnotations[1][0];
 
-                    // remove controller path from current path
-                    $sCurrentPath = str_replace($this->getControllerPattern(), '', $_SERVER['REQUEST_URI']);
+                        // remove controller path from current path
+                        $sCurrentPath = str_replace($this->getControllerPattern(), '', $_SERVER['REQUEST_URI']);
 
-                    //  check if current path is valid
-                    if (1 === preg_match("#^$sPattern$#", $sCurrentPath, $aMatchedParameters)) {
-                        // remove first parameter (matched route)
-                        array_shift($aMatchedParameters);
-                        // if valid : redirect to page
-                        $this->setCurrentRoute($sRoute, $aMatchedParameters);
-                        $bFound = true;
-                        break;
+                        //  check if current path is valid
+                        if (1 === preg_match("#^$sPattern$#", $sCurrentPath, $aMatchedParameters)) {
+                            // remove first parameter (matched route)
+                            array_shift($aMatchedParameters);
+                            // if valid : redirect to page
+                            $this->setCurrentRoute($sRoute, $aMatchedParameters);
+                            $bFound = true;
+                            break;
+                        }
                     }
                 }
             }
+        } catch (\ReflectionException $e) {
         }
 
         if (!$bFound) {
@@ -177,10 +180,14 @@ abstract class AbstractController
     private function getRouteData(): array
     {
         $sPage = $this->getCurrent() . 'Route';
+        try {
+            $oMethod = new \ReflectionMethod($this, $sPage);
+            $aData = $oMethod->invokeArgs($this, $this->aRouteParameters);
+        } catch (\ReflectionException $e) {
+            $aData = [];
+        }
 
-        $oMethod = new \ReflectionMethod($this, $sPage);
-
-        return $oMethod->invokeArgs($this, $this->aRouteParameters);
+        return $aData;
     }
 
     /**

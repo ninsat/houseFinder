@@ -16,7 +16,7 @@ use YoannBlot\HouseFinder\Model\Entity\User;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @TableName("houses_city")
+ * @TableName("city")
  * @method City get(int $iId)
  */
 class CityRepository extends AbstractRepository
@@ -43,17 +43,12 @@ class CityRepository extends AbstractRepository
     {
         $sQuery = '';
         $sQuery .= " SELECT c.*";
-        $sQuery .= " FROM " . $this->getTable() . ' c';
-        $sQuery .= " INNER JOIN houses_user_city uc ON c.id = uc.city_id AND uc.user_id = :id";
+        $sQuery .= " FROM " . $this->getTableName() . ' c';
+        $sQuery .= " INNER JOIN user_city uc ON c.id = uc.city_id AND uc.user_id = :id";
 
         $this->getConnector()->setParameters([':id' => $oUser->getId()]);
-        try {
-            $aCities = $this->getConnector()->queryMultiple($sQuery, $this->getEntityClass());
-        } catch (QueryException $e) {
-            $aCities = [];
-        }
 
-        return $aCities;
+        return $this->getRelationshipService()->getEntities($sQuery, $this->getEntityClass());
     }
 
     /**
@@ -67,14 +62,14 @@ class CityRepository extends AbstractRepository
     {
         $sQuery = '';
         $sQuery .= " SELECT * ";
-        $sQuery .= " FROM " . $this->getTable();
+        $sQuery .= " FROM " . $this->getTableName();
         $sQuery .= " WHERE lower(postal_code) = lower(:postalCode)";
         $sQuery .= " LIMIT 1";
 
         $this->getConnector()->setParameters([':postalCode' => $sPostalCode]);
         try {
             /** @var City $oCity */
-            $oCity = $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
+            $oCity = $this->getRelationshipService()->getEntity($sQuery, $this->getEntityClass());
         } catch (EntityNotFoundException $oException) {
             $this->getLogger()->info("City not found with postal code '$sPostalCode'.");
             $oCity = null;
@@ -96,14 +91,14 @@ class CityRepository extends AbstractRepository
     {
         $sQuery = '';
         $sQuery .= " SELECT * ";
-        $sQuery .= " FROM " . $this->getTable();
+        $sQuery .= " FROM " . $this->getTableName();
         $sQuery .= " WHERE lower(name) = lower(:name)";
         $sQuery .= " LIMIT 1";
 
         $this->getConnector()->setParameters([':name' => $sName]);
         try {
             /** @var City $oCity */
-            $oCity = $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
+            $oCity = $this->getRelationshipService()->getEntity($sQuery, $this->getEntityClass());
         } catch (EntityNotFoundException $oException) {
             $this->getLogger()->info("City not found with name '$sName'.");
             $oCity = null;

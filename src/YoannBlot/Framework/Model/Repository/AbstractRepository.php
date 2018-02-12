@@ -13,6 +13,8 @@ use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Service\DatabaseConnector\ConnectorInterface;
 use YoannBlot\Framework\Service\DatabaseConnector\ConnectorTrait;
+use YoannBlot\Framework\Service\DatabaseCreation\RelationshipService;
+use YoannBlot\Framework\Service\DatabaseCreation\RelationshipTrait;
 use YoannBlot\Framework\Service\Logger\LoggerTrait;
 
 /**
@@ -24,18 +26,23 @@ use YoannBlot\Framework\Service\Logger\LoggerTrait;
 abstract class AbstractRepository
 {
 
-    use LoggerTrait, ConnectorTrait;
+    use LoggerTrait, ConnectorTrait, RelationshipTrait;
 
     /**
-     * AbstractCommand constructor.
+     * AbstractRepository constructor.
      *
      * @param LoggerInterface $oLoggerService logger.
-     * @param ConnectorInterface $oConnectorService connector service.
+     * @param ConnectorInterface $oConnectorService connector.
+     * @param RelationshipService $oRelationshipService relationship service.
      */
-    public function __construct(LoggerInterface $oLoggerService, ConnectorInterface $oConnectorService)
-    {
+    public function __construct(
+        LoggerInterface $oLoggerService,
+        ConnectorInterface $oConnectorService,
+        RelationshipService $oRelationshipService
+    ) {
         $this->oLogger = $oLoggerService;
         $this->oConnector = $oConnectorService;
+        $this->oRelationshipService = $oRelationshipService;
     }
 
     /**
@@ -51,12 +58,12 @@ abstract class AbstractRepository
     }
 
     /**
-     * Try to get the @table annotation in Repository class comment.
+     * Try to get the "TableName" annotation in Repository class comment.
      * If not found, then take the Repository class name as table name.
      *
      * @return string table name.
      */
-    public function getTable(): string
+    public function getTableName(): string
     {
         $sTableName = 'fake';
         try {
@@ -88,7 +95,7 @@ abstract class AbstractRepository
     public function getAll(string $sWhere = '', string $sOrderBy = '', int $iLimit = 0): array
     {
         $sQuery = '';
-        $sQuery .= "select * from {$this->getTable()} ";
+        $sQuery .= "select * from {$this->getTableName()} ";
         if ('' !== $sWhere) {
             $sQuery .= " $sWhere ";
         }
@@ -99,14 +106,7 @@ abstract class AbstractRepository
             $sQuery .= " LIMIT $iLimit";
         }
 
-        try {
-            $aEntities = $this->getConnector()->queryMultiple($sQuery, $this->getEntityClass());
-        } catch (QueryException $oException) {
-            $this->getLogger()->error($oException->getMessage());
-            $aEntities = [];
-        }
-
-        return $aEntities;
+        return $this->getRelationshipService()->getEntities($sQuery, $this->getEntityClass());
     }
 
     /**
@@ -121,9 +121,9 @@ abstract class AbstractRepository
     public function get(int $iId): AbstractEntity
     {
         $sQuery = '';
-        $sQuery .= "select * from " . $this->getTable() . " where id = $iId limit 1";
+        $sQuery .= "select * from {$this->getTableName()} where id = $iId limit 1";
 
-        return $this->getConnector()->querySingle($sQuery, $this->getEntityClass());
+        return $this->getRelationshipService()->getEntity($sQuery, $this->getEntityClass());
     }
 
     /**
@@ -146,6 +146,7 @@ abstract class AbstractRepository
                     $bEnabled = false;
                 }
             } catch (AnnotationException $e) {
+                $bEnabled = true;
             }
         }
 
@@ -205,7 +206,7 @@ abstract class AbstractRepository
         $aColumns = $this->getEntityColumns($oEntity);
 
         $sQuery = '';
-        $sQuery .= ' INSERT INTO ' . $this->getTable() . ' (';
+        $sQuery .= ' INSERT INTO ' . $this->getTableName() . ' (';
         $sQuery .= implode(', ', array_keys($aColumns));
         $sQuery .= ' )';
         $sQuery .= ' VALUES (';

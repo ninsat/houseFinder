@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\Framework\Service\DatabaseCreation;
 
@@ -6,6 +7,7 @@ use Doctrine\Common\Annotations\AnnotationException;
 use Doctrine\Common\Annotations\AnnotationReader;
 use YoannBlot\Framework\Model\DataBase\Annotation\AutoIncrement;
 use YoannBlot\Framework\Model\DataBase\Annotation\DefaultValue;
+use YoannBlot\Framework\Model\DataBase\Annotation\Exclude;
 use YoannBlot\Framework\Model\DataBase\Annotation\Length;
 use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\DataBase\Annotation\Nullable;
@@ -63,9 +65,9 @@ class StructureService
         $aManyToManyTables = [];
         foreach ($this->aTables as $oCurrentTable) {
             foreach ($oCurrentTable->getManyToManyColumns() as $oColumn) {
-                $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($oColumn->getName());
+                $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($oColumn->getType());
                 if (null === $oForeignRepository) {
-                    $this->getLogger()->error("Cannot create ManyToMany table between " . $oCurrentTable->getName() . ' and ' . $oColumn->getName());
+                    $this->getLogger()->error("Cannot create ManyToMany table between " . $oCurrentTable->getName() . ' and ' . $oColumn->getType());
                 } else {
                     $oForeignTable = $this->getTable($oForeignRepository);
                     $oCurrentColumn = new ForeignKeyColumn(
@@ -98,11 +100,11 @@ class StructureService
      */
     public function getTable(AbstractRepository $oRepository): TableStructure
     {
-        if (!array_key_exists($oRepository->getTable(), $this->aTables)) {
+        if (!array_key_exists($oRepository->getTableName(), $this->aTables)) {
             $this->loadTable($oRepository);
         }
 
-        return $this->aTables[$oRepository->getTable()];
+        return $this->aTables[$oRepository->getTableName()];
     }
 
     /**
@@ -112,8 +114,8 @@ class StructureService
      */
     private function loadTable(AbstractRepository $oRepository): void
     {
-        $this->aTables[$oRepository->getTable()] = new TableStructure(
-            $oRepository->getTable(),
+        $this->aTables[$oRepository->getTableName()] = new TableStructure(
+            $oRepository->getTableName(),
             $this->getColumns($oRepository)
         );
     }
@@ -134,8 +136,8 @@ class StructureService
             foreach ($oReflection->getProperties() as $oProperty) {
                 if ($this->hasAnnotation($oProperty, ManyToMany::class)) {
                     $sEntityType = $this->getVariableType($oProperty);
-                    $aColumns[] = new ManyToManyColumn($sEntityType, $sEntityType);
-                } else {
+                    $aColumns[] = new ManyToManyColumn($oProperty->getName(), $sEntityType);
+                } elseif (!$this->hasAnnotation($oProperty, Exclude::class)) {
                     $oColumn = $this->getColumn($oProperty);
                     if (null !== $oColumn) {
                         $aColumns [] = $oColumn;

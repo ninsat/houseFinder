@@ -14,7 +14,7 @@ use YoannBlot\HouseFinder\Model\Entity\House;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @TableName("houses_house")
+ * @TableName("house")
  *
  * @method House get(int $iId)
  * @method House insert(House $oEntity)

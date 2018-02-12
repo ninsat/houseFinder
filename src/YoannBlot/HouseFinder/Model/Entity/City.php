@@ -4,9 +4,7 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Model\Entity;
 
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
-use YoannBlot\Framework\Model\Entity\Common\{
-    Enabled, Name
-};
+use YoannBlot\Framework\Model\Entity\Common\Name;
 use YoannBlot\HouseFinder\Model\Entity\Common\PostalCode;
 
 /**
@@ -18,7 +16,7 @@ use YoannBlot\HouseFinder\Model\Entity\Common\PostalCode;
 final class City extends AbstractEntity
 {
 
-    use Enabled, Name, PostalCode;
+    use Name, PostalCode;
 
     /**
      * @inheritdoc

@@ -46,7 +46,7 @@ class ConnectorTest extends TestCase {
 
     public function testQuerySingleEntityNotFound () {
         $oRepository = new CityRepository();
-        $sFakeQuery = 'select * from ' . $oRepository->getTable() . ' where id = -1 limit 1';
+        $sFakeQuery = 'SELECT * FROM ' . $oRepository->getTableName() . ' WHERE id = -1 LIMIT 1';
 
         $this->expectException(EntityNotFoundException::class);
         $this->oConnector->querySingle($sFakeQuery, Fake::class);

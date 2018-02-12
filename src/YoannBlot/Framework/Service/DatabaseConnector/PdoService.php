@@ -3,18 +3,12 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Service\DatabaseConnector;
 
-use Doctrine\Common\Annotations\AnnotationException;
-use Doctrine\Common\Annotations\AnnotationReader;
-use YoannBlot\Framework\Model\DataBase\Annotation\ManyToMany;
 use YoannBlot\Framework\Model\DataBase\ConfigurationConstants;
 use YoannBlot\Framework\Model\DataBase\DataBaseConfig;
 use YoannBlot\Framework\Model\Entity\AbstractEntity;
-use YoannBlot\Framework\Model\Exception\DataBaseException;
 use YoannBlot\Framework\Model\Exception\EntityNotFoundException;
 use YoannBlot\Framework\Model\Exception\QueryException;
 use YoannBlot\Framework\Service\ConfigurationLoader\LoaderInterface;
-use YoannBlot\Framework\Service\Repository\FactoryService;
-use YoannBlot\Framework\Service\Repository\RepositoryFactoryTrait;
 
 /**
  * Class PdoService.
@@ -23,8 +17,6 @@ use YoannBlot\Framework\Service\Repository\RepositoryFactoryTrait;
  */
 class PdoService implements ConnectorInterface
 {
-
-    use RepositoryFactoryTrait;
 
     /**
      * @var \PDO database connection object.
@@ -46,17 +38,14 @@ class PdoService implements ConnectorInterface
      */
     private $aQueryParameters = [];
 
-
     /**
      * PdoService constructor.
      *
      * @param LoaderInterface $oLoaderService loader.
-     * @param FactoryService $oRepositoryService repository factory service.
      */
-    public function __construct(LoaderInterface $oLoaderService, FactoryService $oRepositoryService)
+    public function __construct(LoaderInterface $oLoaderService)
     {
         $this->oLoaderService = $oLoaderService;
-        $this->oRepositoryFactoryService = $oRepositoryService;
         $this->initConnection();
     }
 
@@ -196,100 +185,8 @@ class PdoService implements ConnectorInterface
         if (false === $oObject) {
             throw new EntityNotFoundException();
         }
-        $this->setManyToOneAssociations($oObject);
-        $this->setOneToManyAssociations($oObject);
 
         return $oObject;
-    }
-
-    /**
-     * Add ManyToOne associations to given entity.
-     *
-     * @param AbstractEntity $oEntity entity.
-     */
-    private function setManyToOneAssociations(AbstractEntity $oEntity): void
-    {
-        try {
-            $oReflection = new \ReflectionClass(AbstractEntity::class);
-            $oProperty = $oReflection->getProperty('aForeignKeyValues');
-            $oProperty->setAccessible(true);
-            $aForeignValues = $oProperty->getValue($oEntity);
-            foreach ($aForeignValues as $sColumnName => $iForeignKeyValue) {
-                $oColumn = new \ReflectionProperty($oEntity, $sColumnName);
-
-                if (null !== $iForeignKeyValue && 0 !== $iForeignKeyValue) {
-                    $sForeignClass = substr($oColumn->getDocComment(),
-                        strpos($oColumn->getDocComment(), '@var ') + strlen('@var '));
-                    $sForeignClass = substr($sForeignClass, 0, strpos($sForeignClass, ' '));
-
-                    $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($sForeignClass);
-                    if (null !== $oForeignRepository) {
-                        $oForeignEntity = $oForeignRepository->get($iForeignKeyValue);
-                        $oColumn->setAccessible(true);
-                        $oColumn->setValue($oEntity, $oForeignEntity);
-                    }
-                }
-            }
-        } catch (\ReflectionException $e) {
-        } catch (DataBaseException $e) {
-        }
-    }
-
-    /**
-     * Check if given property is a table link or not.
-     *
-     * @param \ReflectionProperty $oProperty property.
-     *
-     * @return ManyToMany|null many to many column.
-     */
-    private function getManyToMany(\ReflectionProperty $oProperty): ?ManyToMany
-    {
-        try {
-            $oAnnotationReader = new AnnotationReader();
-            $oManyToMany = $oAnnotationReader->getPropertyAnnotation($oProperty, ManyToMany::class);
-        } catch (AnnotationException $e) {
-            $oManyToMany = null;
-        }
-
-        return $oManyToMany;
-    }
-
-    /**
-     * Load and set many to many associations.
-     *
-     * @param AbstractEntity $oEntity entity.
-     */
-    private function setOneToManyAssociations(AbstractEntity $oEntity): void
-    {
-        try {
-            $oReflection = new \ReflectionClass($oEntity);
-            foreach ($oReflection->getProperties() as $oProperty) {
-                $oManyToManyColumn = $this->getManyToMany($oProperty);
-                if (null !== $oManyToManyColumn) {
-                    $sForeignClass = substr($oProperty->getDocComment(),
-                        strpos($oProperty->getDocComment(), '@var ') + strlen('@var '));
-                    $sForeignClass = substr($sForeignClass, 0, strpos($sForeignClass, ' '));
-                    $iBracketPosition = strpos($sForeignClass, '[]');
-                    if (false !== $iBracketPosition) {
-                        $sForeignClass = substr($sForeignClass, 0, $iBracketPosition);
-                    }
-                    $oForeignRepository = $this->getRepositoryFactoryService()->getRepository($sForeignClass);
-
-                    $sQuery = '';
-                    $sQuery .= " SELECT f.*";
-                    $sQuery .= " FROM {$oForeignRepository->getTable()} f";
-                    $sQuery .= " INNER JOIN {$oManyToManyColumn->table} l ON f.id = l.{$oManyToManyColumn->foreign_id} AND l.{$oManyToManyColumn->current_id} = :id";
-
-                    $this->setParameters([':id' => $oEntity->getId()]);
-                    $aValues = $this->queryMultiple($sQuery, $sForeignClass);
-
-                    $oProperty->setAccessible(true);
-                    $oProperty->setValue($oEntity, $aValues);
-                }
-            }
-        } catch (\ReflectionException $e) {
-        } catch (DataBaseException $e) {
-        }
     }
 
     /**
@@ -302,14 +199,8 @@ class PdoService implements ConnectorInterface
         if (false === $oStatement->execute($this->getParameters())) {
             throw new QueryException($sQuery, $oStatement->errorInfo()[2], intval($oStatement->errorCode()));
         }
-        $aObjects = [];
-        foreach ($oStatement->fetchAll(\PDO::FETCH_CLASS, $sClassName) as $oObject) {
-            $this->setManyToOneAssociations($oObject);
-            $this->setOneToManyAssociations($oObject);
-            $aObjects [] = $oObject;
-        }
 
-        return $aObjects;
+        return $oStatement->fetchAll(\PDO::FETCH_CLASS, $sClassName);
     }
 
     /**

@@ -13,7 +13,7 @@ use YoannBlot\HouseFinder\Model\Entity\User;
  * @package YoannBlot\HouseFinder\Model\Repository
  * @author  Yoann Blot
  *
- * @TableName("houses_user")
+ * @TableName("user")
  *
  * @method User get(int $iId)
  * @method User[] getAll(string $sWhere = '', string $sOrderBy = '', int $iLimit = 0)

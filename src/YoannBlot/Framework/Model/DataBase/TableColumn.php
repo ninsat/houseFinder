@@ -59,7 +59,7 @@ class TableColumn
         bool $bPrimary = false
     ) {
         $this->sName = $sName;
-        $this->sType = strtoupper($sType);
+        $this->sType = $sType;
         $this->bIsNullable = $bIsNullable;
         $this->sDefaultValue = $sDefaultValue;
         $this->bAutoIncrement = $bAutoIncrement;
