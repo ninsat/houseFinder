@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Entity;
 
@@ -12,12 +13,14 @@ use PHPUnit\Framework\TestCase;
  *
  * @cover   City
  */
-class CityTest extends TestCase {
+class CityTest extends TestCase
+{
 
     /**
      * Test city name.
      */
-    public function testName () {
+    public function testName()
+    {
         $oCity = new City();
 
         // default value
@@ -38,7 +41,8 @@ class CityTest extends TestCase {
     /**
      * Test city postal code.
      */
-    public function testPostalCode () {
+    public function testPostalCode()
+    {
         $oCity = new City();
 
         // default value
@@ -51,30 +55,8 @@ class CityTest extends TestCase {
         static::assertEmpty($oCity->getPostalCode());
 
         // valid postal code
-        $sPostalCode = 'test';
+        $sPostalCode = '2B033';
         $oCity->setPostalCode($sPostalCode);
         static::assertEquals($sPostalCode, $oCity->getPostalCode());
-    }
-
-    /**
-     * Test city enabled.
-     */
-    public function testEnabled () {
-        $oCity = new City();
-
-        // default value
-        static::assertTrue($oCity->isEnabled());
-
-        // invalid
-        $oCity->setEnabled('');
-        static::assertFalse($oCity->isEnabled());
-        $oCity->setEnabled(156);
-        static::assertTrue($oCity->isEnabled());
-
-        // valid
-        $oCity->setEnabled(false);
-        static::assertFalse($oCity->isEnabled());
-        $oCity->setEnabled(true);
-        static::assertTrue($oCity->isEnabled());
     }
 }

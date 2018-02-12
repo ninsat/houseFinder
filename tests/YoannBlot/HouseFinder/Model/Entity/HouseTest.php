@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Model\Entity;
 
@@ -12,12 +13,14 @@ use PHPUnit\Framework\TestCase;
  *
  * @cover   House
  */
-class HouseTest extends TestCase {
+class HouseTest extends TestCase
+{
 
     /**
      * Test house title.
      */
-    public function testTitle () {
+    public function testTitle()
+    {
         $oHouse = new House();
 
         // default value
@@ -38,19 +41,13 @@ class HouseTest extends TestCase {
     /**
      * Test house enabled.
      */
-    public function testEnabled () {
+    public function testEnabled()
+    {
         $oHouse = new House();
 
         // default value
         static::assertTrue($oHouse->isEnabled());
 
-        // invalid
-        $oHouse->setEnabled('');
-        static::assertFalse($oHouse->isEnabled());
-        $oHouse->setEnabled(156);
-        static::assertTrue($oHouse->isEnabled());
-
-        // valid
         $oHouse->setEnabled(false);
         static::assertFalse($oHouse->isEnabled());
         $oHouse->setEnabled(true);
@@ -60,7 +57,8 @@ class HouseTest extends TestCase {
     /**
      * Test house description.
      */
-    public function testDescription () {
+    public function testDescription()
+    {
         $oHouse = new House();
 
         // default value
@@ -81,7 +79,8 @@ class HouseTest extends TestCase {
     /**
      * Test house url.
      */
-    public function testUrl () {
+    public function testUrl()
+    {
         $oHouse = new House();
 
         // default value
@@ -102,7 +101,8 @@ class HouseTest extends TestCase {
     /**
      * Test house type.
      */
-    public function testType () {
+    public function testType()
+    {
         $oHouse = new House();
 
         // default value
@@ -121,28 +121,10 @@ class HouseTest extends TestCase {
     }
 
     /**
-     * Test house site id.
-     */
-    public function testSiteId () {
-        $oHouse = new House();
-
-        // default value
-        static::assertEmpty($oHouse->getSiteId());
-
-        // invalid site id
-        $oHouse->setSiteId('');
-        static::assertEmpty($oHouse->getSiteId());
-
-        // valid site id
-        $sSiteId = 'XX-YY';
-        $oHouse->setSiteId($sSiteId);
-        static::assertEquals($sSiteId, $oHouse->getSiteId());
-    }
-
-    /**
      * Test house pieces.
      */
-    public function testPieces () {
+    public function testPieces()
+    {
         $oHouse = new House();
 
         // default value
@@ -169,7 +151,8 @@ class HouseTest extends TestCase {
     /**
      * Test house bedrooms .
      */
-    public function testBedrooms () {
+    public function testBedrooms()
+    {
         $oHouse = new House();
 
         // default value
@@ -196,7 +179,8 @@ class HouseTest extends TestCase {
     /**
      * Test house surface .
      */
-    public function testSurface () {
+    public function testSurface()
+    {
         $oHouse = new House();
 
         // default value
@@ -223,7 +207,8 @@ class HouseTest extends TestCase {
     /**
      * Test house rent.
      */
-    public function testRent () {
+    public function testRent()
+    {
         $oHouse = new House();
 
         // default value
@@ -232,7 +217,7 @@ class HouseTest extends TestCase {
         // invalid
         $oHouse->setRent(-1);
         static::assertEquals(0, $oHouse->getRent());
-        $oHouse->setRent(3000);
+        $oHouse->setRent(30000);
         static::assertEquals(0, $oHouse->getRent());
 
         // valid
@@ -250,7 +235,8 @@ class HouseTest extends TestCase {
     /**
      * Test house fees.
      */
-    public function testFees () {
+    public function testFees()
+    {
         $oHouse = new House();
 
         // default value
@@ -259,7 +245,7 @@ class HouseTest extends TestCase {
         // invalid
         $oHouse->setFees(-1);
         static::assertEquals(0, $oHouse->getFees());
-        $oHouse->setFees(3000);
+        $oHouse->setFees(30000);
         static::assertEquals(0, $oHouse->getFees());
 
         // valid
@@ -277,7 +263,8 @@ class HouseTest extends TestCase {
     /**
      * Test house guarantee.
      */
-    public function testGuarantee () {
+    public function testGuarantee()
+    {
         $oHouse = new House();
 
         // default value
@@ -286,7 +273,7 @@ class HouseTest extends TestCase {
         // invalid
         $oHouse->setGuarantee(-1);
         static::assertEquals(0, $oHouse->getGuarantee());
-        $oHouse->setGuarantee(3000);
+        $oHouse->setGuarantee(30000);
         static::assertEquals(0, $oHouse->getGuarantee());
 
         // valid
@@ -304,19 +291,13 @@ class HouseTest extends TestCase {
     /**
      * Test house has bath.
      */
-    public function testHasBath () {
+    public function testHasBath()
+    {
         $oHouse = new House();
 
         // default value
         static::assertFalse($oHouse->hasBath());
 
-        // invalid
-        $oHouse->setBath('');
-        static::assertFalse($oHouse->hasBath());
-        $oHouse->setBath(156);
-        static::assertTrue($oHouse->hasBath());
-
-        // valid
         $oHouse->setBath(false);
         static::assertFalse($oHouse->hasBath());
         $oHouse->setBath(true);
@@ -326,7 +307,8 @@ class HouseTest extends TestCase {
     /**
      * Test house date.
      */
-    public function testDate () {
+    public function testDate()
+    {
         $oHouse = new House();
 
         // default value
