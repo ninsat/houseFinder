@@ -3,6 +3,7 @@
 namespace YoannBlot\HouseFinder\Command\Finder;
 
 use YoannBlot\Framework\Command\AbstractCommand;
+use YoannBlot\Framework\Model\Exception\ParameterException;
 use YoannBlot\Framework\Service\Logger\LoggerService;
 use YoannBlot\HouseFinder\Model\Repository\Helper\UserTrait;
 use YoannBlot\HouseFinder\Model\Repository\UserRepository;
@@ -42,14 +43,13 @@ class RetrieveHousesCommand extends AbstractCommand
     public function run(): bool
     {
         $bSuccess = false;
-
-        // TODO retrieve command parameter user id
-        $iUserId = 1;
-
-        $oUser = $this->oUserRepository->get($iUserId);
-
-        if (null !== $oUser) {
-            $bSuccess = $this->oHouseCrawler->run($oUser);
+        try {
+            $oUser = $this->oUserRepository->get(intval($this->getParameter()));
+            if (null !== $oUser) {
+                $bSuccess = $this->oHouseCrawler->run($oUser);
+            }
+        } catch (ParameterException $oException) {
+            $bSuccess = false;
         }
 
         return $bSuccess;

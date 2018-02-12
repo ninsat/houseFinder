@@ -86,18 +86,23 @@ class Kernel
     /**
      * Select the right command from arguments.
      *
-     * @param string $sCommandName command name.
+     * @param array $aCommandArguments command arguments.
      *
      * @return AbstractCommand command.
      * @throws CommandNotFoundException command not found.
      */
-    private function selectCommand(string $sCommandName): ?AbstractCommand
+    private function selectCommand(array $aCommandArguments): ?AbstractCommand
     {
+        $sCommandName = $aCommandArguments[1];
         $oSelectedCommand = $this->getContainer()->getCommand($sCommandName);
         if (null === $oSelectedCommand) {
             $this->getContainer()->getLogger()->warning("Command '$sCommandName' not found.");
             throw new CommandNotFoundException("Command '$sCommandName' not found.");
         }
+        unset($aCommandArguments[0]);
+        unset($aCommandArguments[1]);
+
+        $oSelectedCommand->setParameters($aCommandArguments);
 
         return $oSelectedCommand;
     }
@@ -105,12 +110,12 @@ class Kernel
     /**
      * Run the right command.
      *
-     * @param array $argv command arguments.
+     * @param array $aCommandArguments command arguments.
      */
-    public function runCommand(array $argv): void
+    public function runCommand(array $aCommandArguments): void
     {
         try {
-            $oCommand = $this->selectCommand($argv[1]);
+            $oCommand = $this->selectCommand($aCommandArguments);
             if ($oCommand->run()) {
                 $this->getContainer()->getLogger()->info("Command " . get_class($oCommand) . " run with success");
             } else {

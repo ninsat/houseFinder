@@ -28,6 +28,11 @@ class LoggerService implements LoggerInterface
     private $iLogLevel = self::DEFAULT_MODE;
 
     /**
+     * @var bool true for output logs to console.
+     */
+    private $bOutput = false;
+
+    /**
      * LoggerService constructor.
      *
      * @param LoaderInterface $oLoaderService loader service.
@@ -85,6 +90,14 @@ class LoggerService implements LoggerInterface
     }
 
     /**
+     * @param bool $bOutputMode output mode.
+     */
+    public function setOutput(bool $bOutputMode): void
+    {
+        $this->bOutput = $bOutputMode;
+    }
+
+    /**
      * @return string log file path
      */
     private function getFile(): string
@@ -100,12 +113,14 @@ class LoggerService implements LoggerInterface
         if ($this->isAllowed($level)) {
             $sMode = strtoupper(LogValues::getMode($level));
             $sHeaders = date('[Y-m-d H:i:s]') . '   ' . $sMode . '   ';
-            error_log($sHeaders . $message . PHP_EOL, 3, $this->getFile());
-
             $sIpAddress = array_key_exists('REMOTE_ADDR', $_SERVER) ? $_SERVER['REMOTE_ADDR'] : 'local';
             $sPath = array_key_exists('REQUEST_URI', $_SERVER) ? $_SERVER['REQUEST_URI'] : 'test';
-            $message = 'IP : ' . $sIpAddress . ' / path : ' . $sPath;
-            error_log($sHeaders . $message . PHP_EOL, 3, $this->getFile());
+
+            $sErrorMessage = $sHeaders . $message . PHP_EOL . $sHeaders . 'IP : ' . $sIpAddress . ' / path : ' . $sPath . PHP_EOL;
+            error_log($sErrorMessage, 3, $this->getFile());
+            if ($this->bOutput) {
+                echo $sErrorMessage;
+            }
         }
     }
 

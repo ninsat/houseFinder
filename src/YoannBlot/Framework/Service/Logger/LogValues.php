@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Service\Logger;
 
+use Psr\Log\LogLevel;
+
 /**
  * Class LogValues.
  * All possible values a Log can have.
@@ -32,31 +34,30 @@ abstract class LogValues
      */
     public static function get(string $sLogLevel): int
     {
-        $sLogLevel = strtoupper($sLogLevel);
+        $sLogLevel = strtolower($sLogLevel);
         switch ($sLogLevel) {
-            case 'DEBUG':
+            case LogLevel::DEBUG:
                 $iValue = static::DEBUG;
                 break;
-            case 'INFO':
+            case LogLevel::INFO:
                 $iValue = static::INFO;
                 break;
-            case 'NOTICE':
+            case LogLevel::NOTICE:
                 $iValue = static::NOTICE;
                 break;
-            case 'WARNING':
-            case 'WARN':
+            case LogLevel::WARNING:
                 $iValue = static::WARNING;
                 break;
-            case 'ERROR':
+            case LogLevel::ERROR:
                 $iValue = static::ERROR;
                 break;
-            case 'CRITICAL':
+            case LogLevel::CRITICAL:
                 $iValue = static::CRITICAL;
                 break;
-            case 'ALERT':
+            case LogLevel::ALERT:
                 $iValue = static::ALERT;
                 break;
-            case 'EMERGENCY':
+            case LogLevel::EMERGENCY:
                 $iValue = static::EMERGENCY;
                 break;
             default :
@@ -76,29 +77,29 @@ abstract class LogValues
     {
         switch ($iLevel) {
             case static::DEBUG:
-                $sMode = 'DEBUG';
+                $sMode = LogLevel::DEBUG;
                 break;
             case static::INFO:
-                $sMode = 'INFO';
+                $sMode = LogLevel::INFO;
                 break;
             case static::NOTICE:
-                $sMode = 'NOTICE';
+                $sMode = LogLevel::NOTICE;
                 break;
             case static::WARNING:
-                $sMode = 'WARNING';
+                $sMode = LogLevel::WARNING;
                 break;
             case  static::ERROR:
-                $sMode = 'ERROR';
+                $sMode = LogLevel::ERROR;
                 break;
             case static::CRITICAL:
-                $sMode = 'CRITICAL';
+                $sMode = LogLevel::CRITICAL;
                 break;
             case static::ALERT:
-                $sMode = 'ALERT';
+                $sMode = LogLevel::ALERT;
                 break;
             case static::EMERGENCY:
             default :
-                $sMode = 'EMERGENCY';
+                $sMode = LogLevel::EMERGENCY;
                 break;
         }
 

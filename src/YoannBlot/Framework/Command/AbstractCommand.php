@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace YoannBlot\Framework\Command;
 
+use Psr\Log\LogLevel;
+use YoannBlot\Framework\Model\Exception\ParameterException;
 use YoannBlot\Framework\Service\Logger\LoggerService;
 use YoannBlot\Framework\Service\Logger\LoggerTrait;
 
@@ -19,6 +21,11 @@ abstract class AbstractCommand
     const FILE_SEPARATOR = '-';
 
     /**
+     * @var string[] command parameters.
+     */
+    private $aParameters = [];
+
+    /**
      * AbstractCommand constructor.
      *
      * @param LoggerService $oLogger logger.
@@ -26,6 +33,58 @@ abstract class AbstractCommand
     public function __construct(LoggerService $oLogger)
     {
         $this->oLogger = $oLogger;
+    }
+
+    /**
+     * Set command parameters.
+     *
+     * @param array $aParameters parameters.
+     */
+    public function setParameters(array $aParameters): void
+    {
+        foreach ($aParameters as $iParameterPosition => $sParameter) {
+            if (false !== strpos($sParameter, '-vvv')) {
+                $this->getLogger()->setLevel(LogLevel::DEBUG);
+            } elseif (false !== strpos($sParameter, '-vv')) {
+                $this->getLogger()->setLevel(LogLevel::INFO);
+            } elseif (false !== strpos($sParameter, '-v')) {
+                $this->getLogger()->setLevel(LogLevel::WARNING);
+            } else {
+                $this->getLogger()->setLevel(LogLevel::ERROR);
+            }
+            $this->getLogger()->setOutput(true);
+
+            if (false !== strpos($sParameter, '-v')) {
+                unset($aParameters[$iParameterPosition]);
+            }
+        }
+
+        $this->aParameters = array_values($aParameters);
+    }
+
+    /**
+     * @return string[] parameters.
+     */
+    public function getParameters(): array
+    {
+        return $this->aParameters;
+    }
+
+    /**
+     * Get a command parameter.
+     *
+     * @param int $iPosition parameter position.
+     *
+     * @return string parameter if found.
+     *
+     * @throws ParameterException parameter exception.
+     */
+    protected function getParameter($iPosition = 0): string
+    {
+        if (count($this->aParameters) < $iPosition + 1) {
+            throw new ParameterException();
+        }
+        return $this->getParameters()[$iPosition];
     }
 
     /**
@@ -65,7 +124,6 @@ abstract class AbstractCommand
         }
 
         $sCommandFileName = implode(static::FILE_SEPARATOR, $aWords);
-
 
         return $sCommandFullName . $sCommandFileName;
     }
