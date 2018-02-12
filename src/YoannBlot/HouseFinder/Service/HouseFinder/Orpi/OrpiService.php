@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Service\HouseFinder\Orpi;
 
 use Symfony\Component\DomCrawler\Crawler;
+use YoannBlot\Framework\Utils\Text\Normalize;
 use YoannBlot\HouseFinder\Model\Entity\City;
 use YoannBlot\HouseFinder\Model\Entity\House;
 use YoannBlot\HouseFinder\Service\HouseFinder\AbstractHouseFinder;
@@ -47,8 +48,7 @@ class OrpiService extends AbstractHouseFinder
         }
         if ($this->getUser()->getCities() > 0) {
             foreach ($this->getUser()->getCities() as $oCity) {
-                $sCityName = str_replace(' ', '-', strtolower($oCity->getName()));
-                // TODO remove accents
+                $sCityName = str_replace(' ', '-', strtolower(Normalize::removeAccents($oCity->getName())));
                 $aFields[] = "locations[]=" . $sCityName;
             }
         }

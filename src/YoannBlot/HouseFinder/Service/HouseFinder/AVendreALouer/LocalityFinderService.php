@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace YoannBlot\HouseFinder\Service\HouseFinder\AVendreALouer;
 
+use YoannBlot\Framework\Utils\Text\Normalize;
 use YoannBlot\HouseFinder\Model\Entity\City;
 use YoannBlot\HouseFinder\Service\HouseCache\HouseCacheService;
 use YoannBlot\HouseFinder\Service\HouseCache\HouseCacheTrait;
@@ -41,7 +42,7 @@ class LocalityFinderService
         if (!$this->getHouseCache()->isValid($sCachePath)) {
             $iTimestamp = strval(time());
             $iTimestamp .= substr($iTimestamp, -3);
-            $sCitySearch = urlencode(strtolower($oCity->getName() . ' (' . $oCity->getPostalCode() . ')'));
+            $sCitySearch = urlencode(strtolower(Normalize::removeAccents($oCity->getName()) . ' (' . $oCity->getPostalCode() . ')'));
             $sLocalityUrl = "https://www.avendrealouer.fr/common/api/localities?term=$sCitySearch&typeId.lte=&typeId.gte=&_=$iTimestamp";
 
             $aLocalities = json_decode(file_get_contents($sLocalityUrl), true);
