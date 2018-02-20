@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace YoannBlot\HouseFinder\Service\HouseFinder\AVendreALouer;
 
 use Symfony\Component\DomCrawler\Crawler;
+use YoannBlot\Framework\Utils\Text\Normalize;
 use YoannBlot\HouseFinder\Model\Entity\City;
 use YoannBlot\HouseFinder\Model\Entity\House;
 use YoannBlot\HouseFinder\Model\Repository\CityRepository;
@@ -159,18 +160,12 @@ class AVendreALouerService extends AbstractHouseFinder
         $oHouse->setDescription(trim($oCrawler->filter('#propertyDesc')->text()));
 
         if ($this->getUser()->isRental()) {
-            $fRent = $oCrawler->filter('.fd-price > .price > .display-price > span')->text();
-            $fRent = htmlentities($fRent);
-            $fRent = str_replace('&nbsp;', '', $fRent);
-            $fRent = html_entity_decode($fRent);
-            $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
+            $fRent = Normalize::removeSpaces($oCrawler->filter('.fd-price > .price > .display-price > span')->text());
+            $fRent = substr($fRent, 0, strpos($fRent, '€'));
             $oHouse->setRent(floatval($fRent));
         } else {
-            $iPrice = $oCrawler->filter("#fd-price-val")->text();
-            $iPrice = htmlentities($iPrice);
-            $iPrice = str_replace('&nbsp;', '', $iPrice);
-            $iPrice = html_entity_decode($iPrice);
-            $iPrice = trim(substr($iPrice, 0, strpos($iPrice, '€')));
+            $iPrice = Normalize::removeSpaces($oCrawler->filter("#fd-price-val")->text());
+            $iPrice = substr($iPrice, 0, strpos($iPrice, '€'));
             $oHouse->setMaxPrice(intval($iPrice));
         }
 

@@ -23,16 +23,6 @@ class CityRepository extends AbstractRepository
 {
 
     /**
-     * @inheritDoc
-     *
-     * @return City[] matched cities.
-     */
-    public function getAll(string $sWhere = 'WHERE enabled = 1', string $sOrderBy = 'name asc', int $iLimit = 0): array
-    {
-        return parent::getAll($sWhere, $sOrderBy, $iLimit);
-    }
-
-    /**
      * Retrieve only user available cities.
      *
      * @param User $oUser user.

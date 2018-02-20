@@ -149,4 +149,21 @@ class Normalize
 
         return $sText;
     }
+
+    /**
+     * Remove all spaces of a text.
+     *
+     * @param string $sText text.
+     *
+     * @return string cleaned text.
+     */
+    public static function removeSpaces(string $sText): string
+    {
+        $sText = htmlentities($sText);
+        $sText = str_replace('&nbsp;', '', $sText);
+        $sText = html_entity_decode($sText);
+        $sText = str_replace([" ", "\n", "\t", "\r", "\0", "\x0B"], '', trim($sText));
+        $sText = trim($sText);
+        return $sText;
+    }
 }
