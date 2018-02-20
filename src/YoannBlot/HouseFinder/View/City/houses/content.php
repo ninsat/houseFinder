@@ -24,7 +24,7 @@
                         <time datetime="<?= $house->getDate()->format(DATE_ATOM); ?>">
                             Ajouté le <?= $house->getDate()->format('d/m/Y'); ?>
                         </time>
-                        <span class="rent"><?= $house->getRent(); ?>&euro;</span>
+                        <span class="rent"><?= $house->isRental() ? $house->getRent() : $house->getMaxPrice(); ?>&euro;</span>
                         <span class="surface"><?= $house->getSurface(); ?> m²</span>
                     </figcaption>
                 </figure>

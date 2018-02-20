@@ -26,14 +26,20 @@ class OrpiService extends AbstractHouseFinder
     {
         $sUrl = '';
         $sUrl .= 'https://www.orpi.com/recherche/ajax/rent?sort=date-up';
+        $sUrl .= $this->getUser()->isRental() ? 'rent' : 'buy';
+        $sUrl .= '?sort=date-up';
 
         $aFields = [];
 
         // TODO house type ?
-        $aFields[] = "realEstateTypes[]=maison";
+        $aFields[] = "realEstateTypes[]=maison&realEstateTypes[]=appartement";
 
-        if ($this->getUser()->getRent() > 0) {
-            $aFields[] = "maxPrice=" . $this->getUser()->getRent();
+        if ($this->getUser()->isRental()) {
+            if ($this->getUser()->getRent() > 0) {
+                $aFields[] = "maxPrice=" . $this->getUser()->getRent();
+            }
+        } else {
+            $aFields[] = "maxPrice=" . $this->getUser()->getMaxPrice();
         }
         if ($this->getUser()->getSurface() > 0) {
             $aFields[] = "minSurface=" . $this->getUser()->getSurface();
@@ -117,7 +123,11 @@ class OrpiService extends AbstractHouseFinder
         $fRent = $oOfferCrawler->filter('.estateOffer-price .current-price > .price')->text();
         $fRent = str_replace(['€', ' '], '', $fRent);
         $fRent = trim($fRent);
-        $oHouse->setRent(floatval($fRent));
+        if ($this->getUser()->isRental()) {
+            $oHouse->setRent(floatval($fRent));
+        } else {
+            $oHouse->setMaxPrice(intval($fRent));
+        }
 
         foreach ($oOfferCrawler->filter('.estate-characteristic-right ul > li') as $oLiElement) {
             /** @var \DOMElement $oLiElement */

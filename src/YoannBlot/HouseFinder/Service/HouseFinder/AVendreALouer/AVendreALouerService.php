@@ -50,16 +50,28 @@ class AVendreALouerService extends AbstractHouseFinder
     public function generateUrl(): string
     {
         $sUrl = '';
-        $sUrl .= "https://www.avendrealouer.fr/recherche.html?pageIndex=1&pageSize=100&sortPropertyName=ReleaseDate&sortDirection=Descending&searchTypeID=2&typeGroupCategoryID=6&transactionId=2";
-
-        // TODO is house ?
-        $iHouseGroupId = 48;
+        $sUrl .= "https://www.avendrealouer.fr/recherche.html?pageIndex=1&pageSize=100&sortPropertyName=ReleaseDate&sortDirection=Descending&";
 
         $aFields = [];
-        $aFields[] = "typeGroupIds=" . $iHouseGroupId;
-        if ($this->getUser()->getRent() > 0) {
-            $aFields[] = "maximumPrice=" . $this->getUser()->getRent();
+        if ($this->getUser()->isRental()) {
+            $aFields[] = "searchTypeID=2";
+            $aFields[] = "typeGroupIds=48";
+            $aFields[] = "typeGroupCategoryID=6";
+            $aFields[] = "transactionId=2";
+            if ($this->getUser()->getRent() > 0) {
+                $aFields[] = "maximumPrice=" . $this->getUser()->getRent();
+            }
+        } else {
+            $aFields[] = "searchTypeID=1";
+            $aFields[] = "typeGroupCategoryID=1";
+            $aFields[] = "typeGroupIds=1,2";
+            $aFields[] = "transactionId=1";
+            if ($this->getUser()->getMaxPrice() > 0) {
+                $aFields[] = "maximumPrice=" . $this->getUser()->getMaxPrice();
+            }
         }
+
+
         if ($this->getUser()->getSurface() > 0) {
             $aFields[] = "minimumSurface=" . $this->getUser()->getSurface();
         }
@@ -146,12 +158,21 @@ class AVendreALouerService extends AbstractHouseFinder
         $oHouse->setHouse(false !== strpos(strtolower($oHouse->getTitle()), 'maison'));
         $oHouse->setDescription(trim($oCrawler->filter('#propertyDesc')->text()));
 
-        $fRent = $oCrawler->filter('.fd-price > .price > .display-price > span')->text();
-        $fRent = htmlentities($fRent);
-        $fRent = str_replace('&nbsp;', '', $fRent);
-        $fRent = html_entity_decode($fRent);
-        $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
-        $oHouse->setRent(floatval($fRent));
+        if ($this->getUser()->isRental()) {
+            $fRent = $oCrawler->filter('.fd-price > .price > .display-price > span')->text();
+            $fRent = htmlentities($fRent);
+            $fRent = str_replace('&nbsp;', '', $fRent);
+            $fRent = html_entity_decode($fRent);
+            $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
+            $oHouse->setRent(floatval($fRent));
+        } else {
+            $iPrice = $oCrawler->filter("#fd-price-val")->text();
+            $iPrice = htmlentities($iPrice);
+            $iPrice = str_replace('&nbsp;', '', $iPrice);
+            $iPrice = html_entity_decode($iPrice);
+            $iPrice = trim(substr($iPrice, 0, strpos($iPrice, '€')));
+            $oHouse->setMaxPrice(intval($iPrice));
+        }
 
         foreach ($oCrawler->filter('#table td') as $oDomElement) {
             /** @var \DOMElement $oDomElement */

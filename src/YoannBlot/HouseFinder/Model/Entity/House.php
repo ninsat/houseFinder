@@ -8,7 +8,7 @@ use YoannBlot\Framework\Model\Entity\Common\{
     Date, Description, Enabled, Title, Url
 };
 use YoannBlot\HouseFinder\Model\Entity\Common\{
-    Bath, Bedrooms, Fees, Guarantee, IsHouse, LinkToCity, LinkToImages, Pieces, Referer, Rent, Surface
+    Bath, Bedrooms, Fees, Guarantee, IsHouse, LinkToCity, LinkToImages, MaxPrice, Pieces, Referer, Rent, Rental, Surface
 };
 
 /**
@@ -20,10 +20,10 @@ use YoannBlot\HouseFinder\Model\Entity\Common\{
 final class House extends AbstractEntity
 {
 
-    use Referer, IsHouse, Enabled, Date, Url,
+    use Rental, Referer, IsHouse, Enabled, Date, Url,
         Title, Description,
         Pieces, Bedrooms, Surface, Bath,
-        Rent, Fees, Guarantee,
+        Rent, Fees, Guarantee, MaxPrice,
         LinkToCity, LinkToImages;
 
     /**

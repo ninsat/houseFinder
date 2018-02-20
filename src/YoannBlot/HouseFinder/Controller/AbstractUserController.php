@@ -42,7 +42,7 @@ abstract class AbstractUserController extends AbstractController
     protected function getUser(): User
     {
         if (null === $this->oUser) {
-            $iId = 1;
+            $iId = 2;
             // TODO retrieve from session / cookie
             $this->oUser = $this->getUserRepository()->get($iId);
         }

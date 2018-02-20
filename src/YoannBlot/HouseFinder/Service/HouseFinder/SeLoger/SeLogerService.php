@@ -15,16 +15,28 @@ use YoannBlot\HouseFinder\Service\HouseFinder\AbstractHouseFinder;
  */
 class SeLogerService extends AbstractHouseFinder
 {
+    const ID_APARTMENT = 1;
+    const ID_HOUSE = 2;
+
     /**
      * @inheritdoc
      */
     public function generateUrl(): string
     {
         $sUrl = '';
-        $sUrl .= "http://www.seloger.com/list_responsive_ajax_main.htm?naturebien=1&idtt=1&div=2238&tri=d_dt_crea&";
+        $sUrl .= "http://www.seloger.com/list_responsive_ajax_main.htm?idtt=1&div=2238&tri=d_dt_crea&";
         $aFields = [];
-        if ($this->getUser()->getRent() > 0) {
-            $aFields[] = "pxmax=" . $this->getUser()->getRent();
+        // TODO switch house type
+        $aFields[] = 'idtypebien=' . static::ID_APARTMENT . ',' . static::ID_HOUSE;
+
+        if ($this->getUser()->isRental()) {
+            $aFields[] = "naturebien=1";
+            if ($this->getUser()->getRent() > 0) {
+                $aFields[] = "pxmax=" . $this->getUser()->getRent();
+            }
+        } else {
+            $aFields[] = "naturebien=1,2,4";
+            $aFields[] = "pxmax=" . $this->getUser()->getMaxPrice();
         }
         if ($this->getUser()->getSurface() > 0) {
             $aFields[] = "surfacemin=" . $this->getUser()->getSurface();
@@ -39,8 +51,6 @@ class SeLogerService extends AbstractHouseFinder
             }
             $aFields[] = "ci=" . implode(',', $aPostalCodes);
         }
-        // TODO house type
-        $aFields[] = 'idtypebien=2,13,14';
 
         $sUrl .= implode('&', $aFields);
 
@@ -112,6 +122,7 @@ class SeLogerService extends AbstractHouseFinder
         $fRent = html_entity_decode($fRent);
         $fRent = trim(substr($fRent, 0, strpos($fRent, '€')));
         $oHouse->setRent(floatval($fRent));
+
 
         // retrieve images
         foreach ($oCrawler->filter('.carrousel__photos img.carrousel_image_visu') as $oImgElement) {

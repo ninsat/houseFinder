@@ -22,10 +22,42 @@ class LeBonCoinService extends AbstractHouseFinder
     public function generateUrl(): string
     {
         $sUrl = '';
-        $sUrl .= "https://www.leboncoin.fr/locations/offres/ile_de_france/?th=1&ros=3&ret=1&";
+        $sUrl .= "https://www.leboncoin.fr/";
+        $sUrl .= $this->getUser()->isRental() ? 'locations/' : 'ventes_immobilieres/';
+        $sUrl .= "offres/?th=1&ros=3&ret=1&";
+
         $aFields = [];
-        if ($this->getUser()->getRent() > 0) {
-            $aFields[] = "mre=" . $this->getUser()->getRent();
+        if ($this->getUser()->isRental()) {
+            if ($this->getUser()->getRent() > 0) {
+                $aFields[] = "mre=" . $this->getUser()->getRent();
+            }
+        } else {
+            if ($this->getUser()->getMaxPrice() > 0) {
+                $aMatchPrices = [
+                    0,
+                    25000,
+                    50000,
+                    75000,
+                    100000,
+                    125000,
+                    150000,
+                    175000,
+                    200000,
+                    225000,
+                    250000,
+                    275000,
+                    300000,
+                    325000,
+                    350000,
+                    400000
+                ];
+                foreach ($aMatchPrices as $iPriceKey => $iPriceValue) {
+                    if ($iPriceValue > $this->getUser()->getMaxPrice()) {
+                        $aFields[] = "pe=" . ($iPriceKey - 1);
+                        break;
+                    }
+                }
+            }
         }
         if ($this->getUser()->getCities() > 0) {
             $aPostalCodes = [];
@@ -113,6 +145,9 @@ class LeBonCoinService extends AbstractHouseFinder
             $sKey = trim($oDomElement->nodeValue);
 
             switch ($sKey) {
+                case'Prix':
+                    $oHouse->setMaxPrice(intval($oDomElement->parentNode->getAttribute('content')));
+                    break;
                 case'Loyer mensuel':
                     $oHouse->setRent(floatval($oDomElement->parentNode->getAttribute('content')));
                     break;

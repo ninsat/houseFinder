@@ -88,6 +88,7 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
     private function getCity(): City
     {
         $oCity = $this->parseCity();
+        $oFoundCity = null;
         if ('' !== $oCity->getPostalCode()) {
             $oFoundCity = $this->getCityRepository()->getOneByPostalCode($oCity->getPostalCode());
         } elseif ('' !== $oCity->getName()) {
@@ -196,18 +197,22 @@ abstract class AbstractHouseFinder implements HouseCrawlerInterface
         if (!$this->getHouseCache()->isValid($sHousePath)) {
             $this->getHouseCache()->save(file_get_contents($sUrl));
         }
-        $oCity = $this->getCity();
-        if ($this->isValidCity($oCity)) {
-            $oHouse = $this->getHouse();
-            $oHouse->setCity($oCity);
-            $oHouse->setReferer($this->getName());
-            $oHouse->setUrl($sUrl);
+        try {
+            $oCity = $this->getCity();
+            if ($this->isValidCity($oCity)) {
+                $oHouse = $this->getHouse();
+                $oHouse->setCity($oCity);
+                $oHouse->setReferer($this->getName());
+                $oHouse->setUrl($sUrl);
+                $oHouse->setRental($this->getUser()->isRental());
 
-            $oHouse = $this->getHouseRepository()->insert($oHouse);
-            if (null !== $oHouse) {
-                $this->getHouseImages()->save($oHouse);
-                // TODO send notification to user
+                $oHouse = $this->getHouseRepository()->insert($oHouse);
+                if (null !== $oHouse) {
+                    $this->getHouseImages()->save($oHouse);
+                    // TODO send notification to user
+                }
             }
+        } catch (\Exception $e) {
         }
     }
 
